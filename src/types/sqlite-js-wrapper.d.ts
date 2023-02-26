@@ -1,3 +1,3 @@
-declare class SQLiteWrapper {
+declare class SQLiteWrapper extends any {
   constructor(): any;
 }

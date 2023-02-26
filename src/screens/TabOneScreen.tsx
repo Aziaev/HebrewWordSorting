@@ -1,24 +1,25 @@
-import { StyleSheet } from "react-native";
+import {StyleSheet} from "react-native";
 import TableColumns from "../components/TableColumns";
-import { Text, View } from "../components/Themed";
-import { RootTabScreenProps } from "../../types";
-import { useDatabaseStateSelector } from "../store/slices/dataBase/database.hooks";
+import {Text, View} from "../components/Themed";
+import {RootTabScreenProps} from "../types/types";
+import {useDbInit} from "../db/hooks";
 
 export default function TabOneScreen({
-  navigation,
-}: RootTabScreenProps<"TabOne">) {
-  const { status, error, ready } = useDatabaseStateSelector();
+                                       navigation,
+                                     }: RootTabScreenProps<"TabOne">) {
+  const status = useDbInit()
+
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{status}</Text>
-      <Text style={styles.text}>{error}</Text>
+      <Text style={styles.text}>{status}</Text>
       <View
         style={styles.separator}
         lightColor="#eee"
         darkColor="rgba(255,255,255,0.1)"
       />
       {ready && <TableColumns navigation={navigation} />}
+      {status === "DB is ready" && <TableColumns navigation={navigation}/>}
     </View>
   );
 }

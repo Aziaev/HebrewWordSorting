@@ -1,17 +1,15 @@
-import { StatusBar } from "expo-status-bar";
-import { Platform, StyleSheet } from "react-native";
+import {StatusBar} from "expo-status-bar";
+import {Platform, StyleSheet} from "react-native";
 import * as SQLite from "expo-sqlite";
-import { Text, View } from "../components/Themed";
+import {Text, View} from "../components/Themed";
 // @ts-expect-error
 import SQLiteWrapper from "sqlite-js-wrapper";
-import { dbName, ETable } from "../store/slices/dataBase/database.thunks";
-import { useEffect, useState } from "react";
-import { useDatabaseStateSelector } from "../store/slices/dataBase/database.hooks";
-import { map } from "lodash";
-import { ITime } from "../types";
+import {useEffect, useState} from "react";
+import map from "lodash/map";
+import {ITime} from "../types";
+import {dbName, ETable} from "../db/constants";
 
 export default function TimesModal() {
-  const { ready } = useDatabaseStateSelector();
   const [list, setList] = useState<ITime[]>([]);
 
   useEffect(() => {
@@ -20,6 +18,7 @@ export default function TimesModal() {
       const sw = new SQLiteWrapper(db);
 
       const { data } = await sw
+      const {data} = await sw
         .table(ETable.times)
         .orderBy("time", "ASC")
         .select(null, 20, 0);
@@ -31,6 +30,8 @@ export default function TimesModal() {
       void fetchList();
     }
   }, [ready]);
+    void fetchList();
+  },);
 
   return (
     <View style={styles.container}>

@@ -1,17 +1,16 @@
-import { StatusBar } from "expo-status-bar";
-import { Platform, StyleSheet } from "react-native";
+import {StatusBar} from "expo-status-bar";
+import {Platform, StyleSheet} from "react-native";
 import * as SQLite from "expo-sqlite";
-import { Text, View } from "../components/Themed";
+import {Text, View} from "../components/Themed";
 // @ts-expect-error
 import SQLiteWrapper from "sqlite-js-wrapper";
-import { dbName, ETable } from "../store/slices/dataBase/database.thunks";
-import { useEffect, useState } from "react";
-import { useDatabaseStateSelector } from "../store/slices/dataBase/database.hooks";
-import { map } from "lodash";
-import { IString } from "../types";
+import {useEffect, useState} from "react";
+import {map} from "lodash";
+import {IString} from "../types";
+import {dbName, ETable} from "../db/constants";
 
 export default function StringsModal() {
-  const { ready } = useDatabaseStateSelector();
+  const ready = true;
   const [list, setList] = useState<IString[]>([]);
 
   useEffect(() => {

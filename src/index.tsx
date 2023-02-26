@@ -1,40 +1,30 @@
-import { StatusBar } from "expo-status-bar";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import {StatusBar} from "expo-status-bar";
+import {SafeAreaProvider} from "react-native-safe-area-context";
 import useCachedResources from "./hooks/useCachedResources";
 import useColorScheme from "./hooks/useColorScheme";
 import Navigation from "./navigation";
-import store from "./store";
-import { Provider } from "react-redux";
-import { FC, useEffect } from "react";
-import { useDatabaseDispatchedActions } from "./store/slices/dataBase/database.hooks";
+import {FC} from "react";
+import {LogBox} from "react-native";
+import registerRootComponent from 'expo/build/launch/registerRootComponent';
+import {useDbInit} from "./db/hooks";
 
-export default function Provided() {
-  return (
-    <Provider store={store}>
-      <SafeAreaProvider>
-        <App />
-      </SafeAreaProvider>
-    </Provider>
-  );
-}
+LogBox.ignoreAllLogs();
 
 const App: FC = () => {
   const isLoadingComplete = useCachedResources();
   const colorScheme = useColorScheme();
-  const { initDb } = useDatabaseDispatchedActions();
-
-  useEffect(() => {
-    console.log("init db started");
-    void initDb();
-  }, [initDb]);
 
   if (!isLoadingComplete) {
     return null;
   }
   return (
     <SafeAreaProvider>
-      <Navigation colorScheme={colorScheme} />
-      <StatusBar />
+      <Navigation colorScheme={colorScheme}/>
+      <StatusBar/>
     </SafeAreaProvider>
   );
 };
+
+const RootComponent = registerRootComponent(App);
+
+export default RootComponent
