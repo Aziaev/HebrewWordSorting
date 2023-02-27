@@ -1,13 +1,13 @@
-import {StatusBar} from "expo-status-bar";
-import {Platform, StyleSheet} from "react-native";
+import { StatusBar } from "expo-status-bar";
+import { Platform, StyleSheet } from "react-native";
 import * as SQLite from "expo-sqlite";
-import {Text, View} from "../components/Themed";
+import { Text, View } from "../components/Themed";
 // @ts-expect-error
 import SQLiteWrapper from "sqlite-js-wrapper";
-import {useEffect, useState} from "react";
-import {map} from "lodash";
-import {INikud} from "../types";
-import {dbName, ETable} from "../db/constants";
+import { useEffect, useState } from "react";
+import { map } from "lodash";
+import { INikud } from "../types";
+import { dbName, ETable } from "../store/constants";
 
 export default function NikudModal() {
   const ready = true;
@@ -41,7 +41,7 @@ export default function NikudModal() {
       ))}
 
       {/* Use a light status bar on iOS to account for the black space above the modal */}
-      <StatusBar style={Platform.OS === "ios" ? "light" : "auto"}/>
+      <StatusBar style={Platform.OS === "ios" ? "light" : "auto"} />
     </View>
   );
 }

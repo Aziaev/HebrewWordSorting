@@ -1,11 +1,12 @@
 export enum EStatus {
-  idle = "idle",
+  ready = "ready",
   loading = "loading",
   error = "error",
 }
 
 export interface IString {
-  roots: string;
+  id: number;
+  root: string;
   words: string;
   word: string;
   r: string;
@@ -20,7 +21,7 @@ export const StringSchema = [
     autoIncrement: true,
   },
   {
-    columnName: "roots",
+    columnName: "root",
     dataType: "text",
     notNull: false,
   },

@@ -1,16 +1,15 @@
-import {StatusBar} from "expo-status-bar";
-import {Platform, StyleSheet} from "react-native";
+import { StatusBar } from "expo-status-bar";
+import { Platform, StyleSheet } from "react-native";
 import * as SQLite from "expo-sqlite";
-import {Text, View} from "../components/Themed";
+import { Text, View } from "../components/Themed";
 // @ts-expect-error
 import SQLiteWrapper from "sqlite-js-wrapper";
-import {useEffect, useState} from "react";
-import {map} from "lodash";
-import {IVerb} from "../types";
-import {dbName, ETable} from "../db/constants";
+import { useEffect, useState } from "react";
+import { map } from "lodash";
+import { IVerb } from "../types";
+import { dbName, ETable } from "../store/constants";
 
 export default function VerbsModal() {
-
   const ready = true;
   const [list, setList] = useState<IVerb[]>([]);
 
@@ -20,7 +19,10 @@ export default function VerbsModal() {
         const db = SQLite.openDatabase(dbName);
         const sw = new SQLiteWrapper(db);
 
-        const {data} = await sw.table(ETable.verbs).select(null, 20, 0);
+        const { data } = await sw
+          .table(ETable.verbs)
+          .orderBy("base", "ASC")
+          .select(null, 20, 0);
 
         setList(data);
       } catch (e) {

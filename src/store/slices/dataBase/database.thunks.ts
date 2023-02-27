@@ -2,11 +2,11 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { RootState } from "../../index";
 import { version } from "../../../assets/json/version.json";
 import * as SQLite from "expo-sqlite";
-import stringsJson from "../../../assets/json/strings.json";
-import nikudJson from "../../../assets/json/nikud.json";
-import rootsJson from "../../../assets/json/roots.json";
+import stringsJson from "../../../assets/json/spisok1.json";
+import nikudJson from "../../../assets/json/oglasovki.json";
+import rootsJson from "../../../assets/json/kornevoy_slovar.json";
 import timesJson from "../../../assets/json/times.json";
-import verbsJson from "../../../assets/json/verbs.json";
+import verbsJson from "../../../assets/json/tablisi_glagolov.json";
 // @ts-expect-error
 import SQLiteWrapper from "sqlite-js-wrapper";
 import {
@@ -16,7 +16,9 @@ import {
   TimesSchema,
   VerbsSchema,
 } from "../../../types";
-import { forEach, map } from "lodash";
+import { databaseSlice } from "./database";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { EAsyncStorageKey } from "../../constants";
 
 export const dbName = "HebrewWordSorting";
 
@@ -30,65 +32,54 @@ export enum ETable {
 
 export const initDb = createAsyncThunk(
   "database/checkDatabaseUpdates",
-  async (_, { dispatch, getState }) => {
-    const state = getState() as RootState;
+  async (_, { dispatch }) => {
+    const storedVersion = await AsyncStorage.getItem(EAsyncStorageKey.version);
 
-    if (state.database.version !== version) {
+    if (storedVersion !== version) {
       const db = SQLite.openDatabase(dbName);
       const sw = new SQLiteWrapper(db);
 
-      console.log("createTable strings");
-
+      dispatch(databaseSlice.actions.setProgress("creating strings"));
       await sw.dropTable(ETable.strings);
-
       await sw.createTable(ETable.strings, StringSchema);
-
       await sw.insert(ETable.strings, stringsJson);
 
-      console.log("createTable nikud");
-
+      dispatch(databaseSlice.actions.setProgress("creating nikud"));
       await sw.dropTable(ETable.nikud);
-
       await sw.createTable(ETable.nikud, NikudSchema);
-
       await sw.insert(ETable.nikud, nikudJson);
 
-      console.log("createTable roots");
+      dispatch(databaseSlice.actions.setProgress("creating roots"));
+      await sw.dropTable(ETable.roots);
+      await sw.createTable(ETable.roots, RootsSchema);
+      await sw.insert(ETable.roots, rootsJson);
 
-      try {
-        await sw.dropTable(ETable.roots);
-        console.log("dropTable roots");
-
-        await sw.createTable(ETable.roots, RootsSchema);
-        console.log("createTable roots");
-
-        await sw.insert(ETable.roots, rootsJson);
-
-        // forEach(rootsJson, async (root) => {
-        //   await sw.insert(ETable.roots, root);
-        // });
-        console.log("insert roots");
-      } catch (e) {
-        console.log(e);
-      }
-      //
-      console.log("createTable times");
-
+      dispatch(databaseSlice.actions.setProgress("creating times"));
       await sw.dropTable(ETable.times);
-
       await sw.createTable(ETable.times, TimesSchema);
-
       await sw.insert(ETable.times, timesJson);
 
-      console.log("createTable verbs");
-
+      dispatch(databaseSlice.actions.setProgress("creating verbs"));
       await sw.dropTable(ETable.verbs);
-
       await sw.createTable(ETable.verbs, VerbsSchema);
-
       await sw.insert(ETable.verbs, verbsJson);
 
       console.log(" DB READY");
+
+      await AsyncStorage.setItem(EAsyncStorageKey.version, version);
     }
   }
 );
+
+const keysMap: Record<string, string> = {
+  Roots: "roots",
+  Links: "links",
+  Binyan: "binyan",
+  Word: "word",
+  Word_u: "ua",
+  Word_a: "en",
+  Words1: "words1",
+  Words: "words",
+  Naimenovaniya: "name",
+  Oglasovki: "pronunciation",
+};

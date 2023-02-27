@@ -4,14 +4,12 @@ import * as SQLite from "expo-sqlite";
 import { Text, View } from "../components/Themed";
 // @ts-expect-error
 import SQLiteWrapper from "sqlite-js-wrapper";
-import { dbName, ETable } from "../store/slices/dataBase/database.thunks";
 import { useEffect, useState } from "react";
-import { useDatabaseStateSelector } from "../store/slices/dataBase/database.hooks";
 import { map } from "lodash";
 import { IWordRoot } from "../types";
+import { dbName, ETable } from "../store/constants";
 
 export default function RootsModal() {
-  const { ready } = useDatabaseStateSelector();
   const [list, setList] = useState<IWordRoot[]>([]);
 
   useEffect(() => {
@@ -28,10 +26,8 @@ export default function RootsModal() {
       }
     }
 
-    if (ready) {
-      void fetchList();
-    }
-  }, [ready]);
+    void fetchList();
+  }, []);
 
   return (
     <View style={styles.container}>

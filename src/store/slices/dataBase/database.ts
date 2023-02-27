@@ -13,7 +13,7 @@ const initialState: IDatabase = {
   ready: false,
   version: "string",
   error: null,
-  status: EStatus.idle,
+  status: EStatus.ready,
 };
 
 export const databaseSlice = createSlice({
@@ -31,7 +31,7 @@ export const databaseSlice = createSlice({
     });
     builder.addCase(initDb.fulfilled, (state) => {
       state.error = null;
-      state.status = EStatus.idle;
+      state.status = EStatus.ready;
       state.ready = true;
     });
     builder.addCase(initDb.rejected, (state, action: any) => {

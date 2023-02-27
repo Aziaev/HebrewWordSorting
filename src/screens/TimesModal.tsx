@@ -1,13 +1,13 @@
-import {StatusBar} from "expo-status-bar";
-import {Platform, StyleSheet} from "react-native";
+import { StatusBar } from "expo-status-bar";
+import { Platform, StyleSheet } from "react-native";
 import * as SQLite from "expo-sqlite";
-import {Text, View} from "../components/Themed";
+import { Text, View } from "../components/Themed";
 // @ts-expect-error
 import SQLiteWrapper from "sqlite-js-wrapper";
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import map from "lodash/map";
-import {ITime} from "../types";
-import {dbName, ETable} from "../db/constants";
+import { ITime } from "../types";
+import { dbName, ETable } from "../store/constants";
 
 export default function TimesModal() {
   const [list, setList] = useState<ITime[]>([]);
@@ -18,7 +18,6 @@ export default function TimesModal() {
       const sw = new SQLiteWrapper(db);
 
       const { data } = await sw
-      const {data} = await sw
         .table(ETable.times)
         .orderBy("time", "ASC")
         .select(null, 20, 0);
@@ -26,12 +25,8 @@ export default function TimesModal() {
       setList(data);
     }
 
-    if (ready) {
-      void fetchList();
-    }
-  }, [ready]);
     void fetchList();
-  },);
+  });
 
   return (
     <View style={styles.container}>

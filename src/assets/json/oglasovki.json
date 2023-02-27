@@ -1,0 +1,74 @@
+[
+    {
+        "name": "שׂ (точка у син)",
+        "pronunciation": "ׂ"
+    },
+    {
+        "name": "שׁ (точка у шин)",
+        "pronunciation": "ׁ"
+    },
+    {
+        "name": "אָ (камац)",
+        "pronunciation": "ָ"
+    },
+    {
+        "name": "אֳ (хатаф-камац)",
+        "pronunciation": "ֳ"
+    },
+    {
+        "name": "װ (двойной вав)",
+        "pronunciation": "װ"
+    },
+    {
+        "name": "אֹ (холам)",
+        "pronunciation": "ֹ"
+    },
+    {
+        "name": "אַ (патах)",
+        "pronunciation": "ַ"
+    },
+    {
+        "name": "אֲ (хатаф-патах)",
+        "pronunciation": "ֲ"
+    },
+    {
+        "name": "אֿ (рафэ)",
+        "pronunciation": "ֿ"
+    },
+    {
+        "name": "אְ (шва)",
+        "pronunciation": "ְ"
+    },
+    {
+        "name": "בּ (дагеш), וּ (шурук)",
+        "pronunciation": "ּ"
+    },
+    {
+        "name": "ױ (вав-йуд)",
+        "pronunciation": "ױ"
+    },
+    {
+        "name": "ײ (двойной йуд)",
+        "pronunciation": "ײ"
+    },
+    {
+        "name": "אִ (хирик)",
+        "pronunciation": "ִ"
+    },
+    {
+        "name": "אֶ (сеголь)",
+        "pronunciation": "ֶ"
+    },
+    {
+        "name": "אֱ (хатаф-сеголь)",
+        "pronunciation": "ֱ"
+    },
+    {
+        "name": "אֵ (цейре)",
+        "pronunciation": "ֵ"
+    },
+    {
+        "name": "אֻ (кубуц)",
+        "pronunciation": "ֻ"
+    }
+]
