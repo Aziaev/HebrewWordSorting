@@ -1,7 +1,7 @@
 import { useSelector } from "react-redux";
 import { useMemo } from "react";
 import { useAppDispatch } from "../../index";
-import { searchByString } from "./strings.thunks";
+import { fetchNextPage, searchByString } from "./strings.thunks";
 import { IStringsState, stringsSlice } from "./strings";
 
 export function useStringsDispatchedActions() {
@@ -9,8 +9,8 @@ export function useStringsDispatchedActions() {
 
   return useMemo(
     () => ({
-      searchByString: ({ search }: { search: string }) =>
-        dispatch(searchByString({ search })),
+      searchByString: () => dispatch(searchByString()),
+      fetchNextPage: () => dispatch(fetchNextPage()),
       setSearch: (search: string) =>
         dispatch(stringsSlice.actions.setSearch(search)),
     }),

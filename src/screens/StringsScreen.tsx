@@ -1,10 +1,4 @@
-import {
-  ActivityIndicator,
-  Dimensions,
-  ListView,
-  StyleSheet,
-  TextInput,
-} from "react-native";
+import { Dimensions, StyleSheet, TextInput } from "react-native";
 import { Text, View } from "../components/Themed";
 import { RootTabScreenProps } from "../types/types";
 import {
@@ -12,15 +6,19 @@ import {
   useStringsStateSelector,
 } from "../store/slices/strings/strings.hooks";
 import { useEffect } from "react";
-import { map } from "lodash";
 import { EStatus } from "../types";
 import { FlashList } from "@shopify/flash-list";
+import { EZIndex } from "../constants";
+import Loader from "../components/Loader";
 
 export default function StringsScreen({
   navigation,
 }: RootTabScreenProps<"Strings">) {
-  const { search, list, status } = useStringsStateSelector();
-  const { searchByString, setSearch } = useStringsDispatchedActions();
+  const { search, list, status, error } = useStringsStateSelector();
+  const { searchByString, setSearch, fetchNextPage } =
+    useStringsDispatchedActions();
+
+  console.log("listlength", list.length);
 
   useEffect(() => {
     setSearch("א");
@@ -28,7 +26,8 @@ export default function StringsScreen({
 
   useEffect(() => {
     if (search) {
-      void searchByString({ search });
+      // void debounce(searchByString, 500);
+      void searchByString();
     }
   }, [search, searchByString]);
 
@@ -42,19 +41,20 @@ export default function StringsScreen({
         placeholderTextColor={"grey"}
       />
       <View style={styles.list}>
-        {status === EStatus.loading ? (
-          <ActivityIndicator size="large" color="black" />
-        ) : (
-          <FlashList
-            data={list}
-            estimatedItemSize={100}
-            renderItem={({ item, index, target, extraData }) => (
-              <Text style={styles.text} key={item.id}>
-                {item.word}
-              </Text>
-            )}
-          />
-        )}
+        {error && <Text>{error}</Text>}
+        {status === EStatus.loading && <Loader />}
+        <FlashList
+          data={list}
+          estimatedItemSize={100}
+          renderItem={({ item }) => (
+            <Text style={styles.text} key={item.id}>
+              {item.word}
+            </Text>
+          )}
+          onEndReachedThreshold={0.75}
+          onEndReached={fetchNextPage}
+        />
+        {list.length === 0 && <Text>Ничего не найдено</Text>}
       </View>
     </View>
   );
