@@ -1,10 +1,6 @@
 import { FontAwesome } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import {
-  DarkTheme,
-  DefaultTheme,
-  NavigationContainer,
-} from "@react-navigation/native";
+import { DefaultTheme, NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as React from "react";
 import Colors from "../constants/Colors";
@@ -26,13 +22,8 @@ import { useDatabaseStateSelector } from "../store/slices/dataBase/database.hook
 import DBLoadingScreen from "../screens/DBLoadingScreen";
 
 export default function Navigation() {
-  const colorScheme = useColorScheme();
-
   return (
-    <NavigationContainer
-      linking={LinkingConfiguration}
-      theme={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-    >
+    <NavigationContainer linking={LinkingConfiguration} theme={DefaultTheme}>
       <RootNavigator />
     </NavigationContainer>
   );
@@ -86,13 +77,12 @@ function RootNavigator() {
 const BottomTab = createBottomTabNavigator<RootTabParamList>();
 
 function BottomTabNavigator() {
-  const colorScheme = useColorScheme();
-
   return (
     <BottomTab.Navigator
       initialRouteName="Strings"
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme].tint,
+        tabBarActiveTintColor: Colors.tint,
+        tabBarInactiveTintColor: Colors.tabIconDefault,
       }}
     >
       <BottomTab.Screen
@@ -102,6 +92,16 @@ function BottomTabNavigator() {
           title: "Сортировщик слов",
           tabBarLabel: "Поиск",
           tabBarIcon: ({ color }) => <TabBarIcon name="search" color={color} />,
+          headerStyle: {
+            backgroundColor: "#f7f7f7",
+          },
+          headerTitleAlign: "center",
+          headerTitleStyle: {
+            textAlign: "center",
+            justifyContent: "center",
+            color: Colors.tint,
+          },
+
           // headerRight: () => (
           //   <Pressable
           //     onPress={() => navigation.navigate("Modal")}
@@ -119,14 +119,6 @@ function BottomTabNavigator() {
           // ),
         })}
       />
-      {/*<BottomTab.Screen*/}
-      {/*  name="TabTwo"*/}
-      {/*  component={TabTwoScreen}*/}
-      {/*  options={{*/}
-      {/*    title: "Tab Two",*/}
-      {/*    tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,*/}
-      {/*  }}*/}
-      {/*/>*/}
     </BottomTab.Navigator>
   );
 }

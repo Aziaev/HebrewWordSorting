@@ -9,10 +9,22 @@ export function useStringsDispatchedActions() {
 
   return useMemo(
     () => ({
-      searchByString: () => dispatch(searchByString()),
-      fetchNextPage: () => dispatch(fetchNextPage()),
-      setSearch: (search: string) =>
-        dispatch(stringsSlice.actions.setSearch(search)),
+      searchByString: () => {
+        console.log("searchByString");
+        void dispatch(searchByString());
+      },
+      fetchNextPage: () => {
+        console.log("fetchNextPage");
+        void dispatch(fetchNextPage());
+      },
+      toggleLanguage: () => {
+        console.log("toggleLanguage");
+        void dispatch(stringsSlice.actions.toggleLanguage());
+      },
+      setSearch: (search: string) => {
+        console.log("setSearch");
+        dispatch(stringsSlice.actions.setSearch(search));
+      },
     }),
     [dispatch]
   );

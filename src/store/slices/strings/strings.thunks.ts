@@ -46,7 +46,7 @@ export const fetchNextPage = createAsyncThunk(
     );
     const count = transaction.data[0]["count(*)"];
 
-    if (offset / limit < count / limit) {
+    if (search && offset / limit < count / limit) {
       const newOffset = offset + limit;
       const { data } = await sw
         .table(ETable.strings)

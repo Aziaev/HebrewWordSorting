@@ -36,6 +36,13 @@ export const stringsSlice = createSlice({
     setSearch(state, action: PayloadAction<string>) {
       state.search = action.payload;
     },
+    toggleLanguage(state) {
+      state.lang = getNextLanguage(state.lang);
+      state.search = "";
+      state.list = [];
+      state.limit = initialState.limit;
+      state.offset = initialState.offset;
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(searchByString.pending, (state) => {
@@ -80,3 +87,15 @@ export const stringsSlice = createSlice({
     });
   },
 });
+
+const languages = [ELanguage.en, ELanguage.he, ELanguage.ru, ELanguage.ua];
+
+export function getNextLanguage(lang: ELanguage): ELanguage {
+  const indexOfLanguage = languages.indexOf(lang);
+
+  if (indexOfLanguage !== 3) {
+    return languages[indexOfLanguage + 1];
+  } else {
+    return languages[0];
+  }
+}

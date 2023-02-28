@@ -1,4 +1,9 @@
-import { Dimensions, StyleSheet, TextInput } from "react-native";
+import {
+  Dimensions,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+} from "react-native";
 import { Text, View } from "../components/Themed";
 import { RootTabScreenProps } from "../types/types";
 import {
@@ -9,15 +14,16 @@ import { useEffect } from "react";
 import { EStatus } from "../types";
 import { FlashList } from "@shopify/flash-list";
 import Loader from "../components/Loader";
+import { isEmpty, noop } from "lodash";
+import { FLAGS_MAP } from "../constants";
+import { ELanguage } from "../store/slices/strings/strings";
 
 export default function StringsScreen({
   navigation,
 }: RootTabScreenProps<"Strings">) {
-  const { search, list, status, error } = useStringsStateSelector();
-  const { searchByString, setSearch, fetchNextPage } =
+  const { search, list, status, error, lang } = useStringsStateSelector();
+  const { searchByString, setSearch, fetchNextPage, toggleLanguage } =
     useStringsDispatchedActions();
-
-  console.log("listlength", list.length);
 
   useEffect(() => {
     setSearch("א");
@@ -25,22 +31,36 @@ export default function StringsScreen({
 
   useEffect(() => {
     if (search) {
-      // void debounce(searchByString, 500);
       void searchByString();
     }
   }, [search, searchByString]);
 
   return (
     <View style={styles.container}>
-      <TextInput
-        style={styles.textInput}
-        value={search}
-        onChangeText={setSearch}
-        placeholder="..."
-        placeholderTextColor={"grey"}
-      />
+      <View style={styles.inputGroup}>
+        <TextInput
+          style={[
+            styles.textInput,
+            {
+              textAlign: getIsRtl(lang) ? "right" : "left",
+              fontFamily: getIsRtl(lang) ? "David" : undefined,
+            },
+          ]}
+          value={search}
+          onChangeText={(text) => {
+            const formattedText = formatters[lang](text);
+
+            setSearch(formattedText);
+          }}
+          placeholder="..."
+          placeholderTextColor={"grey"}
+        />
+        <TouchableOpacity onPress={toggleLanguage} style={styles.langButton}>
+          <Text style={styles.flag}>{FLAGS_MAP[lang]}</Text>
+        </TouchableOpacity>
+      </View>
       <View style={styles.list}>
-        {list.length === 0 && (
+        {list.length === 0 && search && (
           <Text style={styles.text}>Ничего не найдено</Text>
         )}
         {error && <Text style={styles.text}>{error}</Text>}
@@ -54,7 +74,7 @@ export default function StringsScreen({
             </Text>
           )}
           onEndReachedThreshold={0.75}
-          onEndReached={fetchNextPage}
+          onEndReached={isEmpty(list) ? noop : fetchNextPage}
         />
       </View>
     </View>
@@ -67,16 +87,35 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "flex-start",
   },
+  inputGroup: {
+    width: Dimensions.get("window").width,
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    height: 55,
+  },
+  langButton: {
+    height: 55,
+    width: 50,
+    backgroundColor: "#f7f7f7",
+    borderBottomColor: "grey",
+    borderBottomWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   textInput: {
+    height: 55,
     paddingTop: 10,
     paddingBottom: 10,
     paddingLeft: 20,
     paddingRight: 20,
     fontSize: 26,
-    width: "100%",
+    width: Dimensions.get("window").width - 50,
     borderBottomColor: "grey",
     borderBottomWidth: 1,
-    fontFamily: "David",
+  },
+  flag: {
+    fontSize: 26,
   },
   word: {
     width: "100%",
@@ -99,3 +138,14 @@ const styles = StyleSheet.create({
     width: Dimensions.get("screen").width,
   },
 });
+
+function getIsRtl(lang: ELanguage) {
+  return lang === ELanguage.he;
+}
+
+const formatters = {
+  [ELanguage.he]: (text: string) => text.replace(/[^\u0590-\u05fe ]+$/i, ""),
+  [ELanguage.en]: (text: string) => text.replace(/[^A-Za-z ]+$/i, ""),
+  [ELanguage.ru]: (text: string) => text.replace(/[^А-ЯҐЄІЇ ]+$/i, ""),
+  [ELanguage.ua]: (text: string) => text.replace(/[^А-ЯҐЄІЇ ]+$/i, ""),
+};

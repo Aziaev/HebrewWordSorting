@@ -7,6 +7,9 @@ import registerRootComponent from "expo/build/launch/registerRootComponent";
 import store from "./store";
 import { Provider } from "react-redux";
 import { useDatabaseDispatchedActions } from "./store/slices/dataBase/database.hooks";
+import { LogBox } from "react-native";
+
+LogBox.ignoreAllLogs();
 
 const Provided: FC = () => {
   const { initDb } = useDatabaseDispatchedActions();
