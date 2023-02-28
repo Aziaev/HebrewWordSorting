@@ -23,13 +23,11 @@ export const searchByString = createAsyncThunk(
     const db = SQLite.openDatabase(dbName);
     const sw = new SQLiteWrapper(db);
 
-    // const { data } = await sw
-    //   .table(ETable.strings)
-    //   .where("word", `${search}%`, "LIKE")
-    //   .orderBy("word", "ASC")
-    //   .select(null, limit, offset);
-
-    const { data } = await sw.table(ETable.nikud).select(null, limit, offset);
+    const { data } = await sw
+      .table(ETable.strings)
+      .where("word", `${search}%`, "LIKE")
+      .orderBy("word", "ASC")
+      .select(null, limit, offset);
 
     return { list: data, limit, offset };
   }
@@ -62,5 +60,3 @@ export const fetchNextPage = createAsyncThunk(
     return { list: [], limit, offset };
   }
 );
-
-// SELECT (*) FROM strings WHERE word LIKE A% LIMIT 30 OFFSET 0 AND ...

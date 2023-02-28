@@ -8,7 +8,6 @@ import {
 import { useEffect } from "react";
 import { EStatus } from "../types";
 import { FlashList } from "@shopify/flash-list";
-import { EZIndex } from "../constants";
 import Loader from "../components/Loader";
 
 export default function StringsScreen({
@@ -41,20 +40,22 @@ export default function StringsScreen({
         placeholderTextColor={"grey"}
       />
       <View style={styles.list}>
-        {error && <Text>{error}</Text>}
+        {list.length === 0 && (
+          <Text style={styles.text}>Ничего не найдено</Text>
+        )}
+        {error && <Text style={styles.text}>{error}</Text>}
         {status === EStatus.loading && <Loader />}
         <FlashList
           data={list}
           estimatedItemSize={100}
           renderItem={({ item }) => (
-            <Text style={styles.text} key={item.id}>
+            <Text style={styles.word} key={item.id}>
               {item.word}
             </Text>
           )}
           onEndReachedThreshold={0.75}
           onEndReached={fetchNextPage}
         />
-        {list.length === 0 && <Text>Ничего не найдено</Text>}
       </View>
     </View>
   );
@@ -77,7 +78,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     fontFamily: "David",
   },
-  text: {
+  word: {
     width: "100%",
     paddingTop: 5,
     paddingBottom: 5,
@@ -85,6 +86,13 @@ const styles = StyleSheet.create({
     paddingRight: 20,
     fontSize: 26,
     fontFamily: "David",
+  },
+  text: {
+    textAlign: "center",
+    width: "100%",
+    justifyContent: "flex-start",
+    padding: 10,
+    fontSize: 18,
   },
   list: {
     flex: 1,
