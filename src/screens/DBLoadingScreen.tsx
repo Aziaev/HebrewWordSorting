@@ -1,5 +1,5 @@
 import { StyleSheet, TouchableOpacity } from "react-native";
-import { Text, View } from "../components/Themed";
+import { Text, View } from "../common/components/Themed";
 import { RootTabScreenProps } from "../types/types";
 import { useDatabaseStateSelector } from "../store/slices/dataBase/database.hooks";
 

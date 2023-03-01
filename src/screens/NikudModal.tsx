@@ -1,7 +1,7 @@
 import { StatusBar } from "expo-status-bar";
 import { Platform, StyleSheet } from "react-native";
 import * as SQLite from "expo-sqlite";
-import { Text, View } from "../components/Themed";
+import { Text, View } from "../common/components/Themed";
 // @ts-expect-error
 import SQLiteWrapper from "sqlite-js-wrapper";
 import { useEffect, useState } from "react";

@@ -1,6 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import * as SQLite from "expo-sqlite";
-import { SQLTransaction } from "expo-sqlite";
 // @ts-expect-error
 import SQLiteWrapper from "sqlite-js-wrapper";
 import { RootState } from "../../index";
@@ -23,11 +22,15 @@ export const searchByString = createAsyncThunk(
     const db = SQLite.openDatabase(dbName);
     const sw = new SQLiteWrapper(db);
 
+    console.log("fffooo");
+
     const { data } = await sw
       .table(ETable.strings)
       .where("word", `${search}%`, "LIKE")
       .orderBy("word", "ASC")
       .select(null, limit, offset);
+
+    console.log("bbbbb", data);
 
     return { list: data, limit, offset };
   }

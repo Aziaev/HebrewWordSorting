@@ -1,11 +1,12 @@
 const tintColorLight = "#2f95dc";
-const tintColorLightGrey = "#f7f7f7";
 
 export default {
   text: "#000",
+  darkGrey: "#aaa",
   background: "#fff",
   tint: tintColorLight,
+  accentColor: tintColorLight,
   tabIconDefault: "#ccc",
   tabIconSelected: tintColorLight,
-  appBackground: tintColorLightGrey,
+  appBackground: "#f7f7f7",
 };

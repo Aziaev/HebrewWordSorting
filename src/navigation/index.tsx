@@ -4,9 +4,8 @@ import { DefaultTheme, NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as React from "react";
 import Colors from "../constants/Colors";
-import useColorScheme from "../hooks/useColorScheme";
 import NotFoundScreen from "../screens/NotFoundScreen";
-import StringsScreen from "../screens/StringsScreen";
+import StringsScreen from "../screens/StringsScreen/StringsScreen";
 import {
   RootStackParamList,
   RootTabParamList,
@@ -20,6 +19,13 @@ import TimesModal from "../screens/TimesModal";
 import VerbsModal from "../screens/VerbsModal";
 import { useDatabaseStateSelector } from "../store/slices/dataBase/database.hooks";
 import DBLoadingScreen from "../screens/DBLoadingScreen";
+import { Pressable, StyleSheet } from "react-native";
+import {
+  useStringsDispatchedActions,
+  useStringsStateSelector,
+} from "../store/slices/strings/strings.hooks";
+import { FLAGS_MAP } from "../constants";
+import { Text } from "../common/components/Themed";
 
 export default function Navigation() {
   return (
@@ -77,6 +83,9 @@ function RootNavigator() {
 const BottomTab = createBottomTabNavigator<RootTabParamList>();
 
 function BottomTabNavigator() {
+  const { lang } = useStringsStateSelector();
+  const { toggleLanguage } = useStringsDispatchedActions();
+
   return (
     <BottomTab.Navigator
       initialRouteName="Strings"
@@ -101,8 +110,17 @@ function BottomTabNavigator() {
             justifyContent: "center",
             color: Colors.tint,
           },
-
-          // headerRight: () => (
+          headerRight: () => (
+            <Pressable
+              onPress={toggleLanguage}
+              style={({ pressed }) => ({
+                opacity: pressed ? 0.5 : 1,
+              })}
+            >
+              <Text style={styles.flag}>{FLAGS_MAP[lang]}</Text>
+            </Pressable>
+          ),
+          // headerLeft: () => (
           //   <Pressable
           //     onPress={() => navigation.navigate("Modal")}
           //     style={({ pressed }) => ({
@@ -112,8 +130,8 @@ function BottomTabNavigator() {
           //     <FontAwesome
           //       name="info-circle"
           //       size={25}
-          //       color={Colors[colorScheme].text}
-          //       style={{ marginRight: 15 }}
+          //       color={Colors.accentColor}
+          //       style={{ marginLeft: 15 }}
           //     />
           //   </Pressable>
           // ),
@@ -132,3 +150,10 @@ function TabBarIcon(props: {
 }) {
   return <FontAwesome size={20} style={{ marginBottom: -3 }} {...props} />;
 }
+
+const styles = StyleSheet.create({
+  flag: {
+    fontSize: 26,
+    marginRight: 15,
+  },
+});

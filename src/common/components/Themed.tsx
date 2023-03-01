@@ -1,14 +1,14 @@
 import { Text as DefaultText, View as DefaultView } from "react-native";
-import Colors from "../constants/Colors";
+import Colors from "../../constants/Colors";
 
 export function useThemeColor(colorName: keyof typeof Colors) {
   return Colors[colorName];
 }
 
-type ThemeProps = {
+interface ThemeProps {
   lightColor?: string;
   darkColor?: string;
-};
+}
 
 export type TextProps = ThemeProps & DefaultText["props"];
 export type ViewProps = ThemeProps & DefaultView["props"];
