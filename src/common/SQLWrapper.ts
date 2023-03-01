@@ -1,3 +1,4 @@
+// @ts-disable-file
 const SQLiteJSWrapper = function (db) {
   this.db = db;
 
@@ -5,6 +6,7 @@ const SQLiteJSWrapper = function (db) {
     return new Promise((resolve, reject) => {
       this.db.transaction(
         (tx) => {
+          console.log(query);
           tx.executeSql(
             query,
             params,
@@ -148,7 +150,7 @@ const SQLiteJSWrapper = function (db) {
       return orderList
         .map((val) => {
           const [field, type, orderMethod] = val;
-          return `${field}${orderMethod ? ` ${orderMethod}` : ""} ${type}`;
+          return `${orderMethod ? `${orderMethod} ` : ""}${field} ${type}`;
         })
         .join(", ");
     };

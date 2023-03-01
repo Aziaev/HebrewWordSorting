@@ -21,7 +21,7 @@ export default function StringList() {
       data={list}
       estimatedItemSize={100}
       renderItem={ListItem}
-      onEndReachedThreshold={0.75}
+      onEndReachedThreshold={0.6}
       onEndReached={isEmpty(list) ? noop : fetchNextPage}
     />
   );

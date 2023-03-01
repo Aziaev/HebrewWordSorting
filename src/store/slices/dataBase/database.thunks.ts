@@ -1,5 +1,4 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { RootState } from "../../index";
 import { version } from "../../../assets/json/version.json";
 import * as SQLite from "expo-sqlite";
 import stringsJson from "../../../assets/json/spisok1.json";
@@ -7,8 +6,6 @@ import nikudJson from "../../../assets/json/oglasovki.json";
 import rootsJson from "../../../assets/json/kornevoy_slovar.json";
 import timesJson from "../../../assets/json/times.json";
 import verbsJson from "../../../assets/json/tablisi_glagolov.json";
-// @ts-expect-error
-import SQLiteWrapper from "sqlite-js-wrapper";
 import {
   NikudSchema,
   RootsSchema,
@@ -19,6 +16,7 @@ import {
 import { databaseSlice } from "./database";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { EAsyncStorageKey } from "../../constants";
+import SQLiteWrapper from "../../../common/SQLWrapper";
 
 export const dbName = "HebrewWordSorting";
 
@@ -37,6 +35,7 @@ export const initDb = createAsyncThunk(
 
     if (storedVersion !== version) {
       const db = SQLite.openDatabase(dbName);
+      // @ts-expect-error
       const sw = new SQLiteWrapper(db);
 
       dispatch(databaseSlice.actions.setProgress("creating strings"));
