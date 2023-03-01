@@ -1,6 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-// @ts-expect-error
-import SQLiteWrapper from "sqlite-js-wrapper";
+import SQLiteWrapper from "../../../common/SQLWrapper";
 import { RootState } from "../../";
 import { database } from "../../../";
 import { find, map, reduce } from "lodash";
@@ -37,12 +36,8 @@ export const fetchNextPage = createAsyncThunk(
   async (_, { getState }: { getState: () => unknown }) => {
     const state = getState() as RootState;
     const { limit, offset, search } = state.strings;
-    const sw = new SQLiteWrapper(database);
 
-    const transaction = await sw.query(
-      `SELECT count(*) FROM ${ETable.strings} as count`
-    );
-    const count = transaction.data[0]["count(*)"];
+    const count = await fetchCount();
 
     if (search && offset / limit < count / limit) {
       const newOffset = offset + limit;
@@ -71,7 +66,7 @@ async function fetchList({
   const sw = new SQLiteWrapper(database);
   const { data } = await sw
     .table(ETable.strings)
-    .where("word", `${search}%%`, "LIKE")
+    .where("word", `${search}%`, "LIKE")
     .orderBy("word", "ASC")
     .select(null, limit, offset);
 
@@ -87,8 +82,6 @@ async function fetchList({
         .where("links", `${item.links}`, "=")
         .select(null);
 
-      console.log(result?.data.length);
-
       return {
         ...item,
         translations: result?.data,
@@ -98,4 +91,14 @@ async function fetchList({
   );
 
   return list;
+}
+
+async function fetchCount() {
+  const sw = new SQLiteWrapper(database);
+
+  const transaction = await sw.query(
+    `SELECT count(*) FROM ${ETable.strings} as count`
+  );
+
+  return transaction.data[0]["count(*)"];
 }
