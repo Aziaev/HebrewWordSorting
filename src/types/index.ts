@@ -11,6 +11,8 @@ export interface IString {
   word: string;
   r: string;
   links: string;
+  translations?: IWordRoot[];
+  time?: ITime;
 }
 
 export const StringSchema = [
@@ -91,6 +93,7 @@ export const TimesSchema = [
 ];
 
 export interface IWordRoot {
+  id: string;
   links: string;
   binyan: string;
   ru: string;

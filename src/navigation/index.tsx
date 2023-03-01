@@ -112,7 +112,7 @@ function BottomTabNavigator() {
           },
           headerRight: () => (
             <Pressable
-              onPress={toggleLanguage}
+              onPress={() => {}}
               style={({ pressed }) => ({
                 opacity: pressed ? 0.5 : 1,
               })}

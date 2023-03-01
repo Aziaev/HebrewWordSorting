@@ -5,17 +5,19 @@ import {
   useStringsStateSelector,
 } from "../../../store/slices/strings/strings.hooks";
 import { FlashList } from "@shopify/flash-list";
-import { isEmpty, noop } from "lodash";
+import { isEmpty, map, noop } from "lodash";
 import { IString } from "../../../types";
 import { ListRenderItemInfo } from "@shopify/flash-list/src/FlashListProps";
 import Colors from "../../../constants/Colors";
+import { ELanguage } from "../../../store/slices/strings/strings";
 
 export default function StringList() {
-  const { list } = useStringsStateSelector();
+  const { list, lang } = useStringsStateSelector();
   const { fetchNextPage } = useStringsDispatchedActions();
 
   return (
     <FlashList<IString>
+      extraData={{ lang }}
       data={list}
       estimatedItemSize={100}
       renderItem={ListItem}
@@ -25,14 +27,18 @@ export default function StringList() {
   );
 }
 
-function ListItem({ item }: ListRenderItemInfo<IString>) {
-  console.log(item);
+function ListItem({ item, extraData: { lang } }: ListRenderItemInfo<IString>) {
   return (
     <View key={item.id} style={styles.card}>
       <Text style={styles.hebrew}>
-        {item.word} {item.words}
+        {item.time && `${item.time.time} ${item.time.pronouns} `}
+        {item.words}
       </Text>
-      <Text style={styles.translation}>translated text is here</Text>
+      {map(item.translations, (translation) => (
+        <Text key={translation.id} style={styles.translation}>
+          {translation[ELanguage.ru]}
+        </Text>
+      ))}
     </View>
   );
 }
@@ -64,7 +70,7 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
     paddingLeft: 20,
     paddingRight: 20,
-    fontSize: 20,
+    fontSize: 16,
     color: Colors.darkGrey,
   },
 });

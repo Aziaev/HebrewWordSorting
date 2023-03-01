@@ -23,7 +23,7 @@ export default function SearchInput() {
       ]}
       value={search}
       onChangeText={(text) => {
-        const formattedText = formatters[lang](text);
+        const formattedText = formatters[lang](text).trim();
 
         setSearch(formattedText);
       }}

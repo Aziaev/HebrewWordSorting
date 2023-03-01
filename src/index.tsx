@@ -8,8 +8,12 @@ import store from "./store";
 import { Provider } from "react-redux";
 import { useDatabaseDispatchedActions } from "./store/slices/dataBase/database.hooks";
 import { LogBox } from "react-native";
+import * as SQLite from "expo-sqlite";
+import { dbName } from "./store/slices/strings/strings.thunks";
 
 LogBox.ignoreAllLogs();
+
+export const database = SQLite.openDatabase(dbName);
 
 const Provided: FC = () => {
   const { initDb } = useDatabaseDispatchedActions();

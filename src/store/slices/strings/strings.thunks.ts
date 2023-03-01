@@ -1,8 +1,10 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import * as SQLite from "expo-sqlite";
 // @ts-expect-error
 import SQLiteWrapper from "sqlite-js-wrapper";
-import { RootState } from "../../index";
+import { RootState } from "../../";
+import { database } from "../../../";
+import { find, map, reduce } from "lodash";
+import { IString } from "../../../types";
 
 export const dbName = "HebrewWordSorting";
 
@@ -19,20 +21,14 @@ export const searchByString = createAsyncThunk(
   async (_, { getState }) => {
     const state = getState() as RootState;
     const { limit, offset, search } = state.strings;
-    const db = SQLite.openDatabase(dbName);
-    const sw = new SQLiteWrapper(db);
 
-    console.log("fffooo");
+    const list = await fetchList({
+      search,
+      limit,
+      offset,
+    });
 
-    const { data } = await sw
-      .table(ETable.strings)
-      .where("word", `${search}%`, "LIKE")
-      .orderBy("word", "ASC")
-      .select(null, limit, offset);
-
-    console.log("bbbbb", data);
-
-    return { list: data, limit, offset };
+    return { list, limit, offset };
   }
 );
 
@@ -41,8 +37,7 @@ export const fetchNextPage = createAsyncThunk(
   async (_, { getState }: { getState: () => unknown }) => {
     const state = getState() as RootState;
     const { limit, offset, search } = state.strings;
-    const db = SQLite.openDatabase(dbName);
-    const sw = new SQLiteWrapper(db);
+    const sw = new SQLiteWrapper(database);
 
     const transaction = await sw.query(
       `SELECT count(*) FROM ${ETable.strings} as count`
@@ -51,15 +46,56 @@ export const fetchNextPage = createAsyncThunk(
 
     if (search && offset / limit < count / limit) {
       const newOffset = offset + limit;
-      const { data } = await sw
-        .table(ETable.strings)
-        .where("word", `${search}%`, "LIKE")
-        .orderBy("word", "ASC")
-        .select(null, limit, newOffset);
+      const list = await fetchList({
+        search,
+        limit,
+        offset: newOffset,
+      });
 
-      return { list: data, limit, offset: newOffset };
+      return { list, limit, offset: newOffset };
     }
 
     return { list: [], limit, offset };
   }
 );
+
+async function fetchList({
+  search,
+  limit,
+  offset,
+}: {
+  search: string;
+  limit: number;
+  offset: number;
+}) {
+  const sw = new SQLiteWrapper(database);
+  const { data } = await sw
+    .table(ETable.strings)
+    .where("word", `${search}%%`, "LIKE")
+    .orderBy("word", "ASC")
+    .select(null, limit, offset);
+
+  const list = await Promise.all(
+    map(data, async (item: IString) => {
+      const { data: times } = await sw.table(ETable.times).select(null);
+      const timeRColumnLinks = map(times, "r");
+      const isVerb = item.r && timeRColumnLinks.includes(item.r);
+
+      const result = await sw
+        .table(ETable.roots)
+        .where("root", `${item.root}`, "=", "AND")
+        .where("links", `${item.links}`, "=")
+        .select(null);
+
+      console.log(result?.data.length);
+
+      return {
+        ...item,
+        translations: result?.data,
+        time: isVerb && find(times, { r: item.r }),
+      };
+    })
+  );
+
+  return list;
+}
