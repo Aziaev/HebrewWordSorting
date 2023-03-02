@@ -11,19 +11,20 @@ import { ELanguage } from "../../store/slices/strings/strings";
 import SearchInput from "./components/SearchInput";
 import { getIsRtl } from "../../common/helpers";
 import StringList from "./components/StringList";
-import Loader from "../../common/components/Loader";
 
 export default function StringsScreen({
   navigation,
 }: RootTabScreenProps<"Strings">) {
-  const { search, list, status, error, lang } = useStringsStateSelector();
+  const { search, list, status, error, inputLanguage } =
+    useStringsStateSelector();
   const { searchByString, setSearch } = useStringsDispatchedActions();
-  const isRtl = getIsRtl(lang);
+  const isRtl = getIsRtl(inputLanguage);
 
   useEffect(() => {
-    if (lang === ELanguage.he) {
+    if (inputLanguage === ELanguage.he) {
       setSearch("א");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

@@ -10,16 +10,19 @@ import { IString } from "../../../types";
 import { ListRenderItemInfo } from "@shopify/flash-list/src/FlashListProps";
 import Colors from "../../../constants/Colors";
 import { ELanguage } from "../../../store/slices/strings/strings";
+import { useAppSelector } from "../../../store/slices/app/app.hooks";
 
 export default function StringList() {
-  const { list, lang } = useStringsStateSelector();
+  const { list, inputLanguage } = useStringsStateSelector();
   const { fetchNextPage } = useStringsDispatchedActions();
+  const { appLanguage } = useAppSelector();
 
   return (
     <FlashList<IString>
-      extraData={{ lang }}
+      extraData={{ inputLanguage, appLanguage }}
       data={list}
       estimatedItemSize={100}
+      // @ts-expect-error
       renderItem={ListItem}
       onEndReachedThreshold={0.6}
       onEndReached={isEmpty(list) ? noop : fetchNextPage}
@@ -27,14 +30,28 @@ export default function StringList() {
   );
 }
 
-function ListItem({ item, extraData: { lang } }: ListRenderItemInfo<IString>) {
+interface IProps extends ListRenderItemInfo<IString> {
+  item: IString;
+  extraData: {
+    inputLanguage: ELanguage;
+    appLanguage: ELanguage.ua | ELanguage.ru;
+  };
+}
+
+function ListItem({ item, extraData: { inputLanguage, appLanguage } }: IProps) {
   const hasTime = item.time?.time && item.time?.pronouns;
 
   return (
     <View key={item.id} style={styles.card}>
       <Text style={styles.translations}>
         {map(item.translations, (translation) => (
-          <Text key={translation.id}>{translation[ELanguage.ru]}</Text>
+          <Text key={translation.id}>
+            {inputLanguage === ELanguage.he
+              ? translation[appLanguage]
+              : translation[inputLanguage] ||
+                translation[inputLanguage] ||
+                translation[ELanguage.ru]}
+          </Text>
         ))}
       </Text>
       <View style={styles.hebrewWords}>

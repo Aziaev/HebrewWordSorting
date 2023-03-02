@@ -19,9 +19,11 @@
       "**/*"
     ],
     "ios": {
+      "bundleIdentifier": "com.ziaev.hebrewWordSorting",
       "supportsTablet": true
     },
     "android": {
+      "package": "com.ziaev.hebrewWordSorting",
       "adaptiveIcon": {
         "foregroundImage": "./src/assets/images/adaptive-icon.png",
         "backgroundColor": "#f7f7f7"

@@ -4,7 +4,7 @@ import { fetchNextPage, searchByString } from "./strings.thunks";
 
 export interface IStringsState {
   search: string;
-  lang: ELanguage;
+  inputLanguage: ELanguage;
   error: string | null | undefined;
   status: EStatus;
   list: IString[];
@@ -21,7 +21,7 @@ export enum ELanguage {
 
 const initialState: IStringsState = {
   search: "",
-  lang: ELanguage.he,
+  inputLanguage: ELanguage.he,
   error: null,
   status: EStatus.ready,
   list: [],
@@ -37,7 +37,7 @@ export const stringsSlice = createSlice({
       state.search = action.payload;
     },
     toggleLanguage(state) {
-      state.lang = getNextLanguage(state.lang);
+      state.inputLanguage = getNextLanguage(state.inputLanguage);
       state.search = "";
       state.list = [];
       state.limit = initialState.limit;

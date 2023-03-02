@@ -33,5 +33,6 @@ module.exports = {
     "react-native/no-inline-styles": 0,
     "react-native/no-raw-text": 2,
     "react-native/no-single-element-style-arrays": 2,
+    "newline-before-return": 2,
   },
 };
