@@ -25,17 +25,17 @@ export const StringSchema = [
   {
     columnName: "root",
     dataType: "text",
-    notNull: false,
+    notNull: true,
   },
   {
     columnName: "words",
     dataType: "text",
-    notNull: false,
+    notNull: true,
   },
   {
     columnName: "word",
     dataType: "text",
-    notNull: false,
+    notNull: true,
   },
   {
     columnName: "r",
@@ -46,6 +46,12 @@ export const StringSchema = [
     columnName: "links",
     dataType: "text",
     notNull: false,
+  },
+  {
+    columnName: "sortKey",
+    dataType: "text",
+    notNull: true,
+    default: null
   },
 ];
 

@@ -1,6 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { RootState } from "../../";
-import { queryCount, queryList, queryUnsortedList } from "./strings.helpers";
+import { queryCount, queryList } from "./strings.helpers";
 
 export const dbName = "HebrewWordSorting";
 
@@ -17,15 +17,6 @@ export const searchByString = createAsyncThunk(
   async (_, { getState }) => {
     const state = getState() as RootState;
     const { limit, offset, search } = state.strings;
-
-    // fetch unsorted list
-    // save to store
-    // set sorted list with translations and pronounces and tenses
-    // set current offset and
-
-    const unsortedList = await queryUnsortedList(search);
-
-    console.log(unsortedList.length);
 
     const list = await queryList({
       search,

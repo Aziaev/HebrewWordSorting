@@ -1,20 +1,8 @@
 import SQLiteWrapper from "../../../common/SQLWrapper";
 import { database } from "../../../index";
-import { find, map } from "lodash";
+import {find, map} from "lodash";
 import { IString } from "../../../types";
 import { ETable } from "./strings.thunks";
-
-export async function queryUnsortedList(search: string) {
-  // @ts-expect-error
-  const sw = new SQLiteWrapper(database);
-  const { data } = await sw
-    .table(ETable.strings)
-    .where("word", `${search}`, null)
-    .where("word", `${search}%`, "LIKE", "OR")
-    .select(null);
-
-  return data;
-}
 
 export async function queryList({
   search,
@@ -27,17 +15,26 @@ export async function queryList({
 }) {
   // @ts-expect-error
   const sw = new SQLiteWrapper(database);
-  const { data } = await sw
-    .table(ETable.strings)
-    .where("word", `${search}`, null)
-    .where("word", `${search}%`, "LIKE", "OR")
-    .orderBy("word", "ASC")
-    .select(null, limit, offset);
+  let strings = []
+  try {
+    const { data } = await sw
+      .table(ETable.strings)
+      .where("word", `${search}`, null)
+      .where("word", `${search}%`, "LIKE", "OR")
+      .orderBy("sortKey", "ASC")
+      .select(null, limit, offset);
+
+    strings = data
+  } catch (e){
+    console.log("query list error", e)
+  }
+
+  console.log(strings[0])
 
   const { data: times } = await sw.table(ETable.times).select(null);
 
   const list = await Promise.all(
-    map(data, async (item: IString) => {
+    map(strings, async (item: IString) => {
       const timeRColumnLinks = map(times, "r");
       const isVerb = item.r && timeRColumnLinks.includes(item.r);
 

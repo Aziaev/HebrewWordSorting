@@ -1,7 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { version } from "../../../assets/json/version.json";
 import * as SQLite from "expo-sqlite";
-import stringsJson from "../../../assets/json/spisok1.json";
 import nikudJson from "../../../assets/json/oglasovki.json";
 import rootsJson from "../../../assets/json/kornevoy_slovar.json";
 import timesJson from "../../../assets/json/times.json";
@@ -17,6 +16,7 @@ import { databaseSlice } from "./database";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { EAsyncStorageKey } from "../../constants";
 import SQLiteWrapper from "../../../common/SQLWrapper";
+import strings from "../../../assets/json/stringsWithSortKey.json";
 
 export const dbName = "HebrewWordSorting";
 
@@ -41,7 +41,7 @@ export const initDb = createAsyncThunk(
       dispatch(databaseSlice.actions.setProgress("creating strings"));
       await sw.dropTable(ETable.strings);
       await sw.createTable(ETable.strings, StringSchema);
-      await sw.insert(ETable.strings, stringsJson);
+      await sw.insert(ETable.strings, strings);
 
       dispatch(databaseSlice.actions.setProgress("creating nikud"));
       await sw.dropTable(ETable.nikud);
