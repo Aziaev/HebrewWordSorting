@@ -91,7 +91,7 @@ function BottomTabNavigator() {
       initialRouteName="Strings"
       screenOptions={{
         tabBarActiveTintColor: Colors.tint,
-        tabBarInactiveTintColor: Colors.tabIconDefault,
+        tabBarInactiveTintColor: Colors.grey3,
       }}
     >
       <BottomTab.Screen

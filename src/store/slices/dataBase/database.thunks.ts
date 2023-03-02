@@ -33,7 +33,7 @@ export const initDb = createAsyncThunk(
   async (_, { dispatch }) => {
     const storedVersion = await AsyncStorage.getItem(EAsyncStorageKey.version);
 
-    if (storedVersion !== version) {
+    if (!storedVersion !== version) {
       const db = SQLite.openDatabase(dbName);
       // @ts-expect-error
       const sw = new SQLiteWrapper(db);

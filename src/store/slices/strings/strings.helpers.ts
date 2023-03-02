@@ -4,6 +4,18 @@ import { find, map } from "lodash";
 import { IString } from "../../../types";
 import { ETable } from "./strings.thunks";
 
+export async function queryUnsortedList(search: string) {
+  // @ts-expect-error
+  const sw = new SQLiteWrapper(database);
+  const { data } = await sw
+    .table(ETable.strings)
+    .where("word", `${search}`, null)
+    .where("word", `${search}%`, "LIKE", "OR")
+    .select(null);
+
+  return data;
+}
+
 export async function queryList({
   search,
   limit,

@@ -34,7 +34,7 @@ export const StringSchema = [
   },
   {
     columnName: "word",
-    dataType: "text COLLATE UNICODE",
+    dataType: "text",
     notNull: false,
   },
   {

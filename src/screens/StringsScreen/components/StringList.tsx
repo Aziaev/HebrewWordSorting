@@ -28,6 +28,8 @@ export default function StringList() {
 }
 
 function ListItem({ item, extraData: { lang } }: ListRenderItemInfo<IString>) {
+  const hasTime = item.time?.time && item.time?.pronouns;
+
   return (
     <View key={item.id} style={styles.card}>
       <Text style={styles.translations}>
@@ -35,11 +37,20 @@ function ListItem({ item, extraData: { lang } }: ListRenderItemInfo<IString>) {
           <Text key={translation.id}>{translation[ELanguage.ru]}</Text>
         ))}
       </Text>
-
-      <Text style={styles.hebrew}>
-        {item.time && `${item.time.time} ${item.time.pronouns} `}
-        {item.words}
-      </Text>
+      <View style={styles.hebrewWords}>
+        {hasTime ? (
+          <View style={styles.row}>
+            <Text style={[styles.hebrewText, styles.word]}>{item.words}</Text>
+            <Text style={[styles.hebrewText, styles.auxWords]}>
+              {item?.time?.time} ${item?.time?.pronouns}
+            </Text>
+          </View>
+        ) : (
+          <Text style={[styles.hebrewText, { textAlign: "center" }]}>
+            {item.words}
+          </Text>
+        )}
+      </View>
     </View>
   );
 }
@@ -47,14 +58,14 @@ function ListItem({ item, extraData: { lang } }: ListRenderItemInfo<IString>) {
 const styles = StyleSheet.create({
   card: {
     marginBottom: 16,
-    borderColor: Colors.appBackground,
+    borderColor: Colors.grey2,
     borderWidth: 1,
     borderRadius: 5,
     marginLeft: 20,
     marginRight: 20,
   },
   translations: {
-    backgroundColor: Colors.appBackground,
+    backgroundColor: Colors.grey2,
     width: "100%",
     paddingBottom: 5,
     paddingTop: 5,
@@ -63,15 +74,30 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignContent: "center",
   },
-  hebrew: {
-    textAlign: "center",
+  hebrewWords: {
     width: "100%",
     paddingTop: 8,
     paddingBottom: 8,
     paddingLeft: 20,
     paddingRight: 20,
+  },
+  row: {
+    display: "flex",
+    flexDirection: "row",
+    gap: 10,
+  },
+  hebrewText: {
     fontSize: 28,
     fontFamily: "David",
+  },
+  word: {
+    textAlign: "right",
+    flex: 1,
     color: "black",
+  },
+  auxWords: {
+    textAlign: "left",
+    flex: 1,
+    color: "brown",
   },
 });
