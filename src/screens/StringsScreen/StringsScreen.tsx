@@ -41,7 +41,6 @@ export default function StringsScreen({
           <Text style={styles.text}>Ничего не найдено</Text>
         )}
         {error && <Text style={styles.text}>{error}</Text>}
-        {status === EStatus.loading && <Loader />}
         <StringList />
       </View>
     </View>
