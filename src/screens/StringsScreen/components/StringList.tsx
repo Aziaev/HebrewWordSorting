@@ -58,8 +58,12 @@ function ListItem({ item, extraData: { inputLanguage, appLanguage } }: IProps) {
         {hasTime ? (
           <View style={styles.row}>
             <Text style={[styles.hebrewText, styles.word]}>{item.words}</Text>
-            <Text style={[styles.hebrewText, styles.auxWords]}>
-              {item?.time?.time} ${item?.time?.pronouns}
+            <Text
+              style={[styles.hebrewText, styles.auxWords]}
+              adjustsFontSizeToFit
+              numberOfLines={1}
+            >
+              {item?.time?.time} {item?.time?.pronouns}
             </Text>
           </View>
         ) : (
@@ -101,6 +105,7 @@ const styles = StyleSheet.create({
   row: {
     display: "flex",
     flexDirection: "row",
+    alignItems: "center",
     gap: 10,
   },
   hebrewText: {
@@ -116,5 +121,6 @@ const styles = StyleSheet.create({
     textAlign: "left",
     flex: 1,
     color: "brown",
+    fontSize: 24,
   },
 });
