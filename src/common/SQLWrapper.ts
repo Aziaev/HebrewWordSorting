@@ -1,12 +1,13 @@
-// @ts-disable-file
-const SQLiteJSWrapper = function (db) {
+import { WebSQLDatabase } from "expo-sqlite/src/SQLite.types";
+
+const SQLiteJSWrapper = function (db: WebSQLDatabase) {
   this.db = db;
 
-  this.query = (query, params) => {
-    return new Promise((resolve, reject) => {
+  this.query = async (query, params) => {
+    return await new Promise((resolve, reject) => {
       this.db.transaction(
         (tx) => {
-          console.log(query);
+          console.log(query, params);
           tx.executeSql(
             query,
             params,
@@ -22,7 +23,7 @@ const SQLiteJSWrapper = function (db) {
                 length: result.rows.length,
               });
             },
-            (error) => {
+            (transaction, error) => {
               reject(error);
             }
           );
@@ -34,8 +35,8 @@ const SQLiteJSWrapper = function (db) {
     });
   };
 
-  this.queryMulti = (queries) => {
-    return new Promise((resolve, reject) => {
+  this.queryMulti = async (queries) => {
+    return await new Promise((resolve, reject) => {
       this.db.transaction(
         (tx) => {
           queries.forEach((val) => {
@@ -57,8 +58,8 @@ const SQLiteJSWrapper = function (db) {
     });
   };
 
-  this.sqlBatch = (queries) => {
-    return new Promise((resolve, reject) => {
+  this.sqlBatch = async (queries) => {
+    return await new Promise((resolve, reject) => {
       this.db.sqlBatch(queries, resolve, reject);
     });
   };
@@ -74,12 +75,14 @@ const SQLiteJSWrapper = function (db) {
           .join(",")})`;
         batchQueries.push([query, Object.values(val)]);
       });
+
       return this.queryMulti(batchQueries);
     }
     const query = `INSERT INTO ${table} (${Object.keys(data)}) VALUES (${"?"
       .repeat(Object.keys(data).length)
       .split("")
       .join(",")})`;
+
     return this.query(query, Object.values(data));
   };
 
@@ -94,11 +97,13 @@ const SQLiteJSWrapper = function (db) {
 
     function whereIn(field, valueArray, andOr) {
       this.whereList.push([field, valueArray, "IN", andOr || "AND"]);
+
       return this;
     }
 
     function whereRaw(condition, andOr) {
       this.whereList.push([condition, andOr || "AND"]);
+
       return this;
     }
 
@@ -114,6 +119,7 @@ const SQLiteJSWrapper = function (db) {
     obj.where = where;
     obj.whereIn = whereIn;
     obj.whereRaw = whereRaw;
+
     return obj;
   };
 
@@ -130,6 +136,7 @@ const SQLiteJSWrapper = function (db) {
           }
           if (operator === "IN") {
             param.push(...value);
+
             return `${i > 0 ? andOr : ""} ${field} IN (${"?"
               .repeat(value.length)
               .split("")
@@ -137,12 +144,15 @@ const SQLiteJSWrapper = function (db) {
           }
           if (operator === "BETWEEN") {
             param.push(...value);
+
             return `${i > 0 ? andOr : ""} ${field} BETWEEN ? AND ?`;
           }
           param.push(value);
+
           return `${i > 0 ? andOr : ""} ${field} ${operator} ?`;
         })
         .join(" ");
+
       return { whereStr, param };
     };
 
@@ -150,6 +160,7 @@ const SQLiteJSWrapper = function (db) {
       return orderList
         .map((val) => {
           const [field, type, orderMethod] = val;
+
           return `${orderMethod ? `${orderMethod} ` : ""}${field} ${type}`;
         })
         .join(", ");
@@ -157,41 +168,49 @@ const SQLiteJSWrapper = function (db) {
 
     function distinct() {
       this.isDistinct = true;
+
       return this;
     }
 
     function where(field, value, operator, andOr) {
       this.whereList.push([field, value, operator || "=", andOr || "AND"]);
+
       return this;
     }
 
     function whereIn(field, valueArray, andOr) {
       this.whereList.push([field, valueArray, "IN", andOr || "AND"]);
+
       return this;
     }
 
     function whereBetween(field, valueArray, andOr) {
       this.whereList.push([field, valueArray, "BETWEEN", andOr || "AND"]);
+
       return this;
     }
 
     function whereRaw(condition, andOr) {
       this.whereList.push([condition, andOr || "AND"]);
+
       return this;
     }
 
     function orderBy(field, type, orderMethod) {
       this.orderList.push([field, type || "ASC", orderMethod]);
+
       return this;
     }
 
     function groupBy(groupByArray) {
       this.groupList = groupByArray;
+
       return this;
     }
 
     function having(havingStr) {
       this.havingCondition = havingStr;
+
       return this;
     }
 
@@ -199,6 +218,7 @@ const SQLiteJSWrapper = function (db) {
       const obj = joinObj(joinTable, joinTableAlias, joinType);
       joinCallback(obj);
       this.joinList.push(obj);
+
       return this;
     }
 
@@ -224,6 +244,7 @@ const SQLiteJSWrapper = function (db) {
         const joinOnStr = val.onList
           .map((j, i) => {
             const [field1, field2, operator, andOr] = j;
+
             return `${i > 0 ? andOr : ""} ${field1} ${operator} ${field2}`;
           })
           .join(" ");
@@ -257,7 +278,7 @@ const SQLiteJSWrapper = function (db) {
       return this.query(query, [...joinParams, ...whereData.param]);
     }
 
-    this.delete = function (limit, offset) {
+    this.delete = async function (limit, offset) {
       const tableName = this.alias ? `${this.table} AS ${this.alias}` : table;
       const whereData = getWhereData(this.whereList);
       const order = getOrderStr(this.orderList);
@@ -273,7 +294,7 @@ const SQLiteJSWrapper = function (db) {
       const orderStr = this.orderList.length > 0 ? ` ORDER BY ${order}` : "";
       const query = `DELETE FROM ${tableName}${whereStr}${orderStr}${limitStr}`;
 
-      return new Promise(async (resolve, reject) => {
+      return await new Promise(async (resolve, reject) => {
         this.query(query, whereData.param)
           .then((result) => {
             resolve(result.rowsAffected);
@@ -282,7 +303,7 @@ const SQLiteJSWrapper = function (db) {
       });
     };
 
-    function update(data, limit, offset) {
+    async function update(data, limit, offset) {
       const tableName = this.alias ? `${this.table} AS ${this.alias}` : table;
       const whereData = getWhereData(this.whereList);
       const order = getOrderStr(this.orderList);
@@ -303,7 +324,7 @@ const SQLiteJSWrapper = function (db) {
 
       const query = `UPDATE ${tableName} SET ${setStr} ${whereStr}${orderStr}${limitStr}`;
 
-      return new Promise(async (resolve, reject) => {
+      return await new Promise(async (resolve, reject) => {
         this.query(query, [...Object.values(data), ...whereData.param])
           .then((result) => {
             resolve(result.rowsAffected);
@@ -312,7 +333,7 @@ const SQLiteJSWrapper = function (db) {
       });
     }
 
-    this.exists = function () {
+    this.exists = async function () {
       const tableName = this.alias ? `${this.table} AS ${this.alias}` : table;
       const whereData = getWhereData(this.whereList);
 
@@ -320,7 +341,7 @@ const SQLiteJSWrapper = function (db) {
         this.whereList.length > 0 ? ` WHERE${whereData.whereStr}` : "";
       const query = `SELECT DISTINCT 1 FROM ${tableName}${whereStr}`;
 
-      return new Promise(async (resolve, reject) => {
+      return await new Promise(async (resolve, reject) => {
         this.query(query, whereData.param)
           .then((result) => {
             resolve(result.length > 0);
@@ -354,6 +375,7 @@ const SQLiteJSWrapper = function (db) {
     obj.exists = this.exists;
     obj.update = update;
     obj.query = this.query;
+
     return obj;
   };
 
@@ -364,6 +386,7 @@ const SQLiteJSWrapper = function (db) {
     let colStr = columns
       .map((col) => {
         const quote = typeof col.default === "string" ? "'" : "";
+
         return [
           col.columnName,
           col.dataType || "",
@@ -385,7 +408,7 @@ const SQLiteJSWrapper = function (db) {
       colStr += `, PRIMARY KEY (${primaryKeys.join(", ")})`;
     }
 
-    return new Promise((resolve, reject) => {
+    return await new Promise((resolve, reject) => {
       this.query(
         `CREATE TABLE IF NOT EXISTS ${tableName} (${colStr}) ${
           withRowId ? "[WITHOUT ROWID]" : ""
@@ -398,8 +421,8 @@ const SQLiteJSWrapper = function (db) {
     });
   };
 
-  this.dropTable = (tableName) => {
-    return new Promise((resolve, reject) => {
+  this.dropTable = async (tableName) => {
+    return await new Promise((resolve, reject) => {
       this.query(`DROP TABLE IF EXISTS ${tableName}`)
         .then(() => resolve(true))
         .catch((err) => {
@@ -408,8 +431,8 @@ const SQLiteJSWrapper = function (db) {
     });
   };
 
-  this.isTableExists = (tableName) => {
-    return new Promise((resolve, reject) => {
+  this.isTableExists = async (tableName) => {
+    return await new Promise((resolve, reject) => {
       this.query(
         `SELECT name FROM sqlite_master WHERE type='table' AND name='${tableName}'`
       )

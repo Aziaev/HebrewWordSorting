@@ -1,5 +1,5 @@
-import { ELanguage } from "../store/slices/strings/strings";
+const hebrewLetterRegexp = /[\u0590-\u05fe]/;
 
-export function getIsRtl(lang: ELanguage) {
-  return lang === ELanguage.he;
+export function getIsHebrewText(text: string) {
+  return hebrewLetterRegexp.test(text?.[0]);
 }

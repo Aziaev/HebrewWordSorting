@@ -1,8 +1,8 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { ELanguage } from "../strings/strings";
+import { ELanguage } from "../../../common/constants";
 
 export interface IApp {
-  appLanguage: ELanguage.ru | ELanguage.ua;
+  appLanguage: ELanguage.ru | ELanguage.ua | ELanguage.en;
 }
 
 const initialState: IApp = {
@@ -13,7 +13,10 @@ export const appSlice = createSlice({
   name: "appSlice",
   initialState,
   reducers: {
-    setLanguage(state, action: PayloadAction<ELanguage.ru | ELanguage.ua>) {
+    setLanguage(
+      state,
+      action: PayloadAction<ELanguage.ru | ELanguage.ua | ELanguage.en>
+    ) {
       state.appLanguage = action.payload;
     },
   },

@@ -6,58 +6,69 @@ import {
 } from "../../../store/slices/strings/strings.hooks";
 import { FlashList } from "@shopify/flash-list";
 import { isEmpty, map, noop } from "lodash";
-import { IString } from "../../../types";
+import { IString, IWordRoot } from "../../../types";
 import { ListRenderItemInfo } from "@shopify/flash-list/src/FlashListProps";
-import Colors from "../../../constants/Colors";
-import { ELanguage } from "../../../store/slices/strings/strings";
+import Colors from "../../../common/constants/Colors";
 import { useAppSelector } from "../../../store/slices/app/app.hooks";
+import { ELanguage } from "../../../common/constants";
+import { Fragment } from "react";
+import { getIsHebrewText } from "../../../common/helpers";
 
 export default function StringList() {
-  const { list, inputLanguage } = useStringsStateSelector();
+  const { list, search } = useStringsStateSelector();
   const { fetchNextPage } = useStringsDispatchedActions();
   const { appLanguage } = useAppSelector();
+  const isHebrewSearch = getIsHebrewText(search);
 
   return (
-    <FlashList<IString>
-      extraData={{ inputLanguage, appLanguage }}
+    <FlashList<IString | IWordRoot>
+      extraData={{ appLanguage, search }}
       data={list}
       estimatedItemSize={100}
       // @ts-expect-error
-      renderItem={ListItem}
+      renderItem={isHebrewSearch ? HebrewListItem : ListItem}
       onEndReachedThreshold={0.6}
       onEndReached={isEmpty(list) ? noop : fetchNextPage}
     />
   );
 }
 
-interface IProps extends ListRenderItemInfo<IString> {
+interface IHebrewListItemProps extends ListRenderItemInfo<IString> {
   item: IString;
   extraData: {
-    inputLanguage: ELanguage;
-    appLanguage: ELanguage.ua | ELanguage.ru;
+    appLanguage: ELanguage.ua | ELanguage.ru | ELanguage.en;
+    search: string;
   };
 }
 
-function ListItem({ item, extraData: { inputLanguage, appLanguage } }: IProps) {
-  const hasTime = item.time?.time && item.time?.pronouns;
+function HebrewListItem({
+  item,
+  extraData: { appLanguage },
+}: IHebrewListItemProps) {
+  const hasTime = item?.time?.time && item?.time?.pronouns;
 
   return (
     <View key={item.id} style={styles.card}>
       <Text style={styles.translations}>
-        {map(item.translations, (translation) => (
-          <Text key={translation.id}>
-            {inputLanguage === ELanguage.he
-              ? translation[appLanguage]
-              : translation[inputLanguage] ||
-                translation[inputLanguage] ||
-                translation[ELanguage.ru]}
-          </Text>
+        {map(item.translations, (translation, index, collection) => (
+          <Fragment key={translation.id}>
+            <Text>{translation[appLanguage]}</Text>
+            {index > 0 && index <= collection.length - 1 && (
+              <Text key={translation.id}>, </Text>
+            )}
+          </Fragment>
         ))}
       </Text>
       <View style={styles.hebrewWords}>
         {hasTime ? (
           <View style={styles.row}>
-            <Text style={[styles.hebrewText, styles.word]}>{item.words}</Text>
+            <Text
+              style={[styles.hebrewText, styles.word]}
+              adjustsFontSizeToFit
+              numberOfLines={1}
+            >
+              {item.words}
+            </Text>
             <Text
               style={[styles.hebrewText, styles.auxWords]}
               adjustsFontSizeToFit
@@ -71,6 +82,56 @@ function ListItem({ item, extraData: { inputLanguage, appLanguage } }: IProps) {
             {item.words}
           </Text>
         )}
+      </View>
+    </View>
+  );
+}
+
+interface IListItemProps extends ListRenderItemInfo<IWordRoot> {
+  item: IWordRoot;
+  extraData: {
+    appLanguage: ELanguage.ua | ELanguage.ru | ELanguage.en;
+    search: string;
+  };
+}
+
+function ListItem({ item, extraData: { appLanguage } }: IListItemProps) {
+  return (
+    <View key={item.id} style={styles.card}>
+      <Text style={styles.translations}>
+        <Text>{item[appLanguage]}</Text>
+      </Text>
+      <View style={styles.hebrewWords}>
+        {map(item.strings, (str) => {
+          const hasTime = str?.time?.time && str?.time?.pronouns;
+
+          return (
+            <Fragment key={str.id}>
+              {hasTime ? (
+                <View style={styles.row}>
+                  <Text
+                    style={[styles.hebrewText, styles.word]}
+                    adjustsFontSizeToFit
+                    numberOfLines={1}
+                  >
+                    {str.words}
+                  </Text>
+                  <Text
+                    style={[styles.hebrewText, styles.auxWords]}
+                    adjustsFontSizeToFit
+                    numberOfLines={1}
+                  >
+                    {str?.time?.time} {str?.time?.pronouns}
+                  </Text>
+                </View>
+              ) : (
+                <Text style={[styles.hebrewText, { textAlign: "center" }]}>
+                  {str.words}
+                </Text>
+              )}
+            </Fragment>
+          );
+        })}
       </View>
     </View>
   );

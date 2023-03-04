@@ -1,37 +1,15 @@
 import { Dimensions, StyleSheet } from "react-native";
 import { Text, View } from "../../common/components/Themed";
 import { RootTabScreenProps } from "../../types/types";
-import {
-  useStringsDispatchedActions,
-  useStringsStateSelector,
-} from "../../store/slices/strings/strings.hooks";
-import { useEffect } from "react";
+import { useStringsStateSelector } from "../../store/slices/strings/strings.hooks";
 import { EStatus } from "../../types";
-import { ELanguage } from "../../store/slices/strings/strings";
 import SearchInput from "./components/SearchInput";
-import { getIsRtl } from "../../common/helpers";
 import StringList from "./components/StringList";
 
 export default function StringsScreen({
   navigation,
 }: RootTabScreenProps<"Strings">) {
-  const { search, list, status, error, inputLanguage } =
-    useStringsStateSelector();
-  const { searchByString, setSearch } = useStringsDispatchedActions();
-  const isRtl = getIsRtl(inputLanguage);
-
-  useEffect(() => {
-    if (inputLanguage === ELanguage.he) {
-      setSearch("א");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (isRtl && search) {
-      void searchByString();
-    }
-  }, [isRtl, search, searchByString]);
+  const { search, list, status, error } = useStringsStateSelector();
   const isLoading = status === EStatus.loading;
 
   return (

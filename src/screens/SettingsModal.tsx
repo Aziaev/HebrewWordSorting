@@ -1,14 +1,13 @@
 import { StatusBar } from "expo-status-bar";
 import { Platform, Pressable, StyleSheet } from "react-native";
 import { Text, View } from "../common/components/Themed";
-import { FLAGS_MAP } from "../constants";
+import { ELanguage, FLAGS_MAP } from "../common/constants";
 import * as React from "react";
 import {
   useAppDispatchedActions,
   useAppSelector,
 } from "../store/slices/app/app.hooks";
-import { ELanguage } from "../store/slices/strings/strings";
-import Colors from "../constants/Colors";
+import Colors from "../common/constants/Colors";
 
 export default function SettingsModal() {
   const { appLanguage } = useAppSelector();

@@ -1,27 +1,18 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { EStatus, IString } from "../../../types";
+import { EStatus, IString, IWordRoot } from "../../../types";
 import { fetchNextPage, searchByString } from "./strings.thunks";
 
 export interface IStringsState {
   search: string;
-  inputLanguage: ELanguage;
   error: string | null | undefined;
   status: EStatus;
-  list: IString[];
+  list: IString[] | IWordRoot[];
   limit: number;
   offset: number;
 }
 
-export enum ELanguage {
-  ru = "ru",
-  en = "en",
-  ua = "ua",
-  he = "he",
-}
-
 const initialState: IStringsState = {
-  search: "",
-  inputLanguage: ELanguage.he,
+  search: "א",
   error: null,
   status: EStatus.ready,
   list: [],
@@ -35,13 +26,6 @@ export const stringsSlice = createSlice({
   reducers: {
     setSearch(state, action: PayloadAction<string>) {
       state.search = action.payload;
-    },
-    toggleLanguage(state) {
-      state.inputLanguage = getNextLanguage(state.inputLanguage);
-      state.search = "";
-      state.list = [];
-      state.limit = initialState.limit;
-      state.offset = initialState.offset;
     },
   },
   extraReducers: (builder) => {
@@ -69,7 +53,7 @@ export const stringsSlice = createSlice({
       state.error = null;
       state.status = EStatus.loading;
     });
-    builder.addCase(fetchNextPage.fulfilled, (state, action) => {
+    builder.addCase(fetchNextPage.fulfilled, (state, action: any) => {
       state.error = null;
       state.status = EStatus.ready;
       state.list.push(...action.payload.list);
@@ -87,15 +71,3 @@ export const stringsSlice = createSlice({
     });
   },
 });
-
-const languages = [ELanguage.en, ELanguage.he, ELanguage.ru, ELanguage.ua];
-
-export function getNextLanguage(lang: ELanguage): ELanguage {
-  const indexOfLanguage = languages.indexOf(lang);
-
-  if (indexOfLanguage !== 3) {
-    return languages[indexOfLanguage + 1];
-  } else {
-    return languages[0];
-  }
-}

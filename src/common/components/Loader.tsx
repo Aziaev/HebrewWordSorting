@@ -1,5 +1,5 @@
 import { ActivityIndicator, StyleSheet } from "react-native";
-import { EZIndex } from "../../constants";
+import { EZIndex } from "../constants";
 
 export default function Loader() {
   return <ActivityIndicator size="large" color="black" style={styles.loader} />;

@@ -51,7 +51,7 @@ export const StringSchema = [
     columnName: "sortKey",
     dataType: "text",
     notNull: true,
-    default: null
+    default: null,
   },
 ];
 
@@ -107,6 +107,7 @@ export interface IWordRoot {
   en: string;
   words1: string;
   words: string;
+  strings: IString[];
 }
 
 export const RootsSchema = [

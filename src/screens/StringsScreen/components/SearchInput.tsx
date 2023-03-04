@@ -1,100 +1,53 @@
-import {
-  Dimensions,
-  Pressable,
-  StyleSheet,
-  TextInput,
-  View,
-} from "react-native";
+import { TextInput } from "react-native";
 import {
   useStringsDispatchedActions,
   useStringsStateSelector,
 } from "../../../store/slices/strings/strings.hooks";
-import { ELanguage } from "../../../store/slices/strings/strings";
-import { getIsRtl } from "../../../common/helpers";
-import { Text } from "../../../common/components/Themed";
-import { FLAGS_MAP } from "../../../constants";
+import { INPUT_PLACEHOLDER } from "../../../common/constants";
 import * as React from "react";
-import { noop } from "lodash";
+import { useEffect } from "react";
+import { useAppSelector } from "../../../store/slices/app/app.hooks";
+import Colors from "../../../common/constants/Colors";
+import { getIsHebrewText } from "../../../common/helpers";
 
 export default function SearchInput() {
-  const { search, inputLanguage } = useStringsStateSelector();
-  const { setSearch } = useStringsDispatchedActions();
+  const { appLanguage } = useAppSelector();
+  const { search } = useStringsStateSelector();
+  const { setSearch, searchByString } = useStringsDispatchedActions();
 
-  const isRtl = getIsRtl(inputLanguage);
+  useEffect(() => {
+    searchByString();
+  }, [search, searchByString, appLanguage]);
 
   return (
-    <View style={styles.inputGroup}>
-      <TextInput
-        style={[
-          styles.textInput,
-          {
-            textAlign: isRtl ? "right" : "left",
-            fontFamily: isRtl ? "David" : undefined,
-          },
-        ]}
-        value={search}
-        onChangeText={(text) => {
-          const formattedText = formatters[inputLanguage](text).trim();
-
-          setSearch(formattedText);
-        }}
-        placeholder="..."
-        placeholderTextColor={"grey"}
-      />
-      <Pressable
-        onPress={noop}
-        style={({ pressed }) => {
-          let opacity = 1;
-
-          if (pressed) {
-            opacity = 0.8;
-          }
-
-          return { opacity };
-        }}
-      >
-        <View style={styles.button}>
-          <Text style={styles.flag}>{FLAGS_MAP[inputLanguage]}</Text>
-        </View>
-      </Pressable>
-    </View>
+    <TextInput
+      // @ts-expect-error
+      style={getTextInputStyles(search)}
+      value={search}
+      onChangeText={setSearch}
+      placeholder={INPUT_PLACEHOLDER[appLanguage]}
+      placeholderTextColor={Colors.grey6}
+    />
   );
 }
 
-const styles = StyleSheet.create({
-  textInput: {
-    height: 55,
-    paddingTop: 10,
-    paddingBottom: 10,
+function getTextInputStyles(search: string) {
+  return {
+    paddingTop: 15,
+    paddingBottom: 5,
     paddingLeft: 20,
     paddingRight: 20,
-    fontSize: 26,
-    width: Dimensions.get("window").width - 50,
-  },
-  inputGroup: {
-    display: "flex",
-    flexDirection: "row",
-    height: 50,
-    borderBottomColor: "grey",
+    fontSize: 24,
+    fontFamily: getIsHebrewText(search) ? "David" : undefined,
+    fontWeight: "700",
+    borderBottomColor: Colors.grey6,
     borderBottomWidth: 1,
-  },
-  button: {
-    width: 60,
-    height: "100%",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    textAlign: "center",
-    marginRight: 10,
-  },
-  flag: {
-    fontSize: 26,
-  },
-});
+    textAlign: getDirection(search),
+    width: "100%",
+    height: 55,
+  };
+}
 
-const formatters = {
-  [ELanguage.he]: (text: string) => text.replace(/[^\u0590-\u05fe ]+$/i, ""),
-  [ELanguage.en]: (text: string) => text.replace(/[^A-Za-z ]+$/i, ""),
-  [ELanguage.ru]: (text: string) => text.replace(/[^А-ЯҐЄІЇ ]+$/i, ""),
-  [ELanguage.ua]: (text: string) => text.replace(/[^А-ЯҐЄІЇ ]+$/i, ""),
-};
+function getDirection(text: string): "left" | "right" {
+  return getIsHebrewText(text) ? "right" : "left";
+}

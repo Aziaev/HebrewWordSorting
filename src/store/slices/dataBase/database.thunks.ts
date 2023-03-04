@@ -69,16 +69,3 @@ export const initDb = createAsyncThunk(
     }
   }
 );
-
-const keysMap: Record<string, string> = {
-  Roots: "roots",
-  Links: "links",
-  Binyan: "binyan",
-  Word: "word",
-  Word_u: "ua",
-  Word_a: "en",
-  Words1: "words1",
-  Words: "words",
-  Naimenovaniya: "name",
-  Oglasovki: "pronunciation",
-};
