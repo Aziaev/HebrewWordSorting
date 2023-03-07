@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { EStatus, IString, IWordRoot } from "../../../types";
 import { fetchNextPage, searchByString } from "./strings.thunks";
+import { ELanguage } from "../../../common/constants";
 
 export interface IStringsState {
   search: string;
@@ -9,10 +10,12 @@ export interface IStringsState {
   list: IString[] | IWordRoot[];
   limit: number;
   offset: number;
+  language: ELanguage;
 }
 
 const initialState: IStringsState = {
-  search: "אאבחן",
+  language: ELanguage.ru,
+  search: "א",
   error: null,
   status: EStatus.ready,
   list: [],
@@ -26,6 +29,14 @@ export const stringsSlice = createSlice({
   reducers: {
     setSearch(state, action: PayloadAction<string>) {
       state.search = action.payload;
+    },
+    setLanguage(state, action: PayloadAction<ELanguage>) {
+      console.log("setLanguage");
+      state.language = action.payload;
+      state.search = "";
+      state.list = [];
+      state.limit = initialState.limit;
+      state.offset = initialState.offset;
     },
   },
   extraReducers: (builder) => {
