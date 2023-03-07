@@ -1,9 +1,9 @@
 import SQLiteWrapper from "../../../common/SQLWrapper";
 import { database } from "../../../index";
-import { find, forEach, isEmpty, map } from "lodash";
+import { concat, find, forEach, isEmpty, map, reduce } from "lodash";
 import { IString, IWordRoot } from "../../../types";
 import { ETable } from "./strings.thunks";
-import { createLatinSortKey, getIsHebrewText } from "../../../common/helpers";
+import { getIsHebrewText } from "../../../common/helpers";
 import { ELanguage } from "../../../common/constants";
 
 export async function queryList({
@@ -31,15 +31,29 @@ export async function queryList({
   });
 }
 
-export async function queryCount() {
-  // @ts-expect-error
-  const sw = new SQLiteWrapper(database);
+export async function queryNextPage({
+  search,
+  limit,
+  offset,
+  appLanguage,
+}: {
+  search: string;
+  limit: number;
+  offset: number;
+  appLanguage: ELanguage;
+}) {
+  const isHebrewSearch = getIsHebrewText(search);
 
-  const transaction = await sw.query(
-    `SELECT count(*) FROM ${ETable.strings} as count`
-  );
+  const listQueryFunction = isHebrewSearch
+    ? queryHebrewNextPage
+    : queryOtherLanguageList;
 
-  return transaction.data[0]["count(*)"];
+  return await listQueryFunction({
+    search,
+    limit,
+    offset,
+    appLanguage,
+  });
 }
 
 async function queryHebrewList({
@@ -53,11 +67,9 @@ async function queryHebrewList({
 }) {
   // @ts-expect-error
   const sw = new SQLiteWrapper(database);
-  console.log("create tables");
   let strings = [];
   await sw.query(`DROP TABLE IF EXISTS stringList;`);
   await sw.query(`DROP TABLE IF EXISTS tempStringList;`);
-
   await sw.query(`
     CREATE TABLE IF NOT EXISTS stringList (
       id integer, 
@@ -69,7 +81,6 @@ async function queryHebrewList({
       sortKey text
     );
   `);
-
   await sw.query(`
     CREATE TABLE IF NOT EXISTS tempStringList (
       id integer, 
@@ -88,56 +99,43 @@ async function queryHebrewList({
     `CREATE INDEX IF NOT EXISTS stringListSortKeyIndex ON stringList(sortKey);`
   );
 
-  await sw.query(
-    `CREATE INDEX IF NOT EXISTS tempStringListWordIndex ON tempStringList(word);`
-  );
-  await sw.query(
-    `CREATE INDEX IF NOT EXISTS tempStringListSortKeyIndex ON tempStringList(sortKey);`
-  );
-
-  console.log("matchingRowsQuery");
   const matchingRowsQuery = await sw.query(
     `
       SELECT *
       FROM strings
       WHERE word = ?
       OR word LIKE ?
-      ORDER BY sortKey ASC;
+      ORDER BY sortKey ASC
+      LIMIT 1;
     `,
     [search, `${search}%`]
   );
 
   if (!isEmpty(matchingRowsQuery.data)) {
     const firstMatchingRowId = matchingRowsQuery.data[0]?.id;
-
-    console.log("matchingRowIndexQuery");
     const matchingRowIndexQuery = await sw.query(
       `
-    SELECT *, t.rowIndex
-    FROM (
-        SELECT id, sortKey, ROW_NUMBER() OVER(ORDER BY sortKey) rowIndex
-        FROM strings
-    ) t
-    WHERE t.id = ?;
-  `,
+      SELECT *, t.rowIndex
+      FROM (
+          SELECT id, sortKey, ROW_NUMBER() OVER(ORDER BY sortKey) rowIndex
+          FROM strings
+      ) t
+      WHERE t.id = ?
+      LIMIT 1;
+    `,
       [firstMatchingRowId]
     );
-
     const sliceStartFrom: number = matchingRowIndexQuery.data[0]?.rowIndex - 1;
 
-    console.log("slicedStringsTable");
     // copy to temp sliced table
-    await sw.query(
-      `
-    INSERT INTO tempStringList
-    SELECT *
-    FROM strings
-    ORDER BY sortKey ASC
-    LIMIT -1 
-    OFFSET ${sliceStartFrom};
-   
-    `
-    );
+    await sw.query(`
+        INSERT INTO tempStringList
+        SELECT *
+        FROM strings
+        ORDER BY sortKey ASC
+        LIMIT -1 
+        OFFSET ${sliceStartFrom};
+    `);
 
     const asyncQueries: AsyncQueryFunction[] = [];
 
@@ -154,42 +152,68 @@ async function queryHebrewList({
           `,
           [searchString, `${searchString}%`]
         );
-
         await sw.insert("stringList", data);
-
         const selectedRowIds = map(data, ({ id }) => id);
-
-        await sw.query(
-          `
-            DELETE FROM tempStringList WHERE id IN (?);
-        `,
-          selectedRowIds
-        );
+        sw.table("tempStringList").whereIn("id", selectedRowIds).delete();
       });
     });
 
     await queryAll(asyncQueries);
 
-    const stringListQuery = await sw.query(
-      `
-    SELECT *
-    FROM stringList
-    LIMIT ${offset}, ${limit}
-    `
-    );
+    const stringListQuery = await sw.query(`
+      SELECT *
+      FROM stringList
+      LIMIT ${offset}, ${limit}
+    `);
 
     strings = stringListQuery?.data;
   }
 
+  await sw.query(`DROP TABLE tempStringList`);
+
   const times = await queryTimes();
   const timeRColumnLinks = map(times, "r");
 
-  console.log("map strings");
-
-  await sw.query(`DROP TABLE tempStringList`);
-
   return await Promise.all(
     map(strings, async (item: IString) => {
+      const isVerb = item.r && timeRColumnLinks.includes(item.r);
+
+      const result = await sw
+        .table(ETable.roots)
+        .where("root", `${item.root}`, "=", "AND")
+        .where("links", `${item.links}`, "=")
+        .select(null);
+
+      return {
+        ...item,
+        translations: result?.data,
+        time: isVerb && find(times, { r: item.r }),
+      };
+    })
+  );
+}
+
+async function queryHebrewNextPage({
+  limit,
+  offset,
+}: {
+  search: string;
+  limit: number;
+  offset: number;
+}) {
+  // @ts-expect-error
+  const sw = new SQLiteWrapper(database);
+  const { data } = await sw.query(`
+    SELECT *
+    FROM stringList
+    LIMIT ${offset}, ${limit}
+  `);
+
+  const times = await queryTimes();
+  const timeRColumnLinks = map(times, "r");
+
+  return await Promise.all(
+    map(data, async (item: IString) => {
       const isVerb = item.r && timeRColumnLinks.includes(item.r);
 
       const result = await sw
@@ -218,30 +242,114 @@ export async function queryOtherLanguageList({
   offset: number;
   appLanguage: ELanguage;
 }) {
+  console.log("creating tables");
   // @ts-expect-error
   const sw = new SQLiteWrapper(database);
+  let roots = [];
+  await sw.query(`DROP TABLE IF EXISTS rootList;`);
+  await sw.query(`DROP TABLE IF EXISTS tempRootList;`);
+
+  const rootsTableSchema =
+    "id integer, root text , links text , binyan text , ru text , ruLowerCase text , ua text , uaLowerCase text , en text , enLowerCase text , words1 text , words text";
+
+  await sw.query(`CREATE TABLE IF NOT EXISTS rootList (${rootsTableSchema});`);
+  await sw.query(
+    `CREATE TABLE IF NOT EXISTS tempRootList (${rootsTableSchema});`
+  );
+
   const lowerCaseSearch = search.toLowerCase();
 
-  const sortKeyValue = createLatinSortKey(lowerCaseSearch);
-
-  const { data: wordTranslations } = await sw.query(
+  console.log("matchingRowsQuery");
+  const matchingRowsQuery = await sw.query(
     `
-                        SELECT *
-                        FROM roots
-                        WHERE ${appLanguage}LowerCase = ?
-                        OR ${appLanguage}LowerCase LIKE ?
-                        OR ${appLanguage}LowerCase LIKE ?
-                        ORDER BY ${appLanguage}LowerCase ASC
-                        LIMIT ${offset}, ${limit}
-                      `,
-    [sortKeyValue, `${sortKeyValue}%`, `% ${sortKeyValue}%`]
+      SELECT *
+      FROM roots
+      WHERE ${appLanguage}LowerCase = ?
+      OR ${appLanguage}LowerCase LIKE ?
+      OR ${appLanguage}LowerCase LIKE ?
+      ORDER BY ${appLanguage}LowerCase ASC
+      LIMIT 1
+    `,
+    [lowerCaseSearch, `${lowerCaseSearch}%`, `% ${lowerCaseSearch}%`]
   );
+
+  if (!isEmpty(matchingRowsQuery.data)) {
+    const firstMatchingRowId = matchingRowsQuery.data[0]?.id;
+    console.log("matchingRowIndexQuery");
+    const matchingRowIndexQuery = await sw.query(
+      `
+      SELECT *, t.rowIndex
+      FROM (
+          SELECT id, ${appLanguage}LowerCase, ROW_NUMBER() OVER(ORDER BY ${appLanguage}LowerCase) rowIndex
+          FROM roots
+      ) t
+      WHERE t.id = ?
+      LIMIT 1;
+    `,
+      [firstMatchingRowId]
+    );
+    const sliceStartFrom: number = matchingRowIndexQuery.data[0]?.rowIndex - 1;
+
+    console.log("copy to temp sliced table");
+    // copy to temp sliced table
+    await sw.query(`
+        INSERT INTO tempRootList
+        SELECT *
+        FROM roots
+        ORDER BY ${appLanguage}LowerCase ASC
+        LIMIT -1 
+        OFFSET ${sliceStartFrom};
+    `);
+
+    const asyncQueries: AsyncQueryFunction[] = [];
+
+    console.log("forEach asyncQueries");
+    forEach(Array(lowerCaseSearch.length), async (_, index, collection) => {
+      asyncQueries.push(async () => {
+        const searchString = lowerCaseSearch.slice(
+          0,
+          collection.length - index
+        );
+        const { data } = await sw.query(
+          `
+            SELECT *
+            FROM tempRootList
+            WHERE ${appLanguage}LowerCase = ?
+            OR ${appLanguage}LowerCase LIKE ?
+            OR ${appLanguage}LowerCase LIKE ?
+            ORDER BY ${appLanguage}LowerCase ASC;
+          `,
+          [searchString, `${searchString}%`, `% ${searchString}%`]
+        );
+        await sw.insert("rootList", data);
+        const selectedRowIds = map(data, ({ id }) => id);
+        sw.table("tempRootList").whereIn("id", selectedRowIds).delete();
+      });
+    });
+
+    console.log("queryAll(asyncQueries)");
+
+    await queryAll(asyncQueries);
+
+    const rootListQuery = await sw.query(`
+      SELECT *
+      FROM rootList
+      LIMIT ${offset}, ${limit}
+    `);
+
+    console.log("queryAll(asyncQueries)");
+    roots = rootListQuery?.data;
+  }
+
+  await sw.query(`DROP TABLE tempRootList`);
 
   const times = await queryTimes();
   const timeRColumnLinks = map(times, "r");
 
-  return await Promise.all(
-    map(wordTranslations, async (wordRoot: IWordRoot) => {
+  console.log("Promise.all");
+
+  const mixedRootsStringsArray = await Promise.all(
+    map(roots, async (wordRoot: IWordRoot) => {
       const { data } = await sw
         .table(ETable.strings)
         .where("root", `${wordRoot.root}`, "=", "AND")
@@ -263,6 +371,34 @@ export async function queryOtherLanguageList({
       };
     })
   );
+
+  const flatArray: IWordRoot[] = reduce(
+    mixedRootsStringsArray,
+    (result, item) => {
+      const innerArray = map(item.strings, (string: IString) => ({
+        ...item,
+        string,
+        id: `${item.id}_${string.id}`,
+      }));
+
+      // @ts-expect-error
+      return concat(result, innerArray);
+    },
+    [] as IWordRoot[]
+  );
+
+  return flatArray;
+}
+
+export async function queryCount() {
+  // @ts-expect-error
+  const sw = new SQLiteWrapper(database);
+
+  const transaction = await sw.query(
+    `SELECT count(*) FROM ${ETable.strings} as count`
+  );
+
+  return transaction.data[0]["count(*)"];
 }
 
 async function queryTimes() {
@@ -271,18 +407,6 @@ async function queryTimes() {
   const { data } = await sw.table(ETable.times).select(null);
 
   return data;
-}
-
-async function queryTableLength(tableName: string) {
-  // @ts-expect-error
-  const sw = new SQLiteWrapper(database);
-
-  const tableLengthQuery = await sw.query(`
-    SELECT COUNT(*) as length
-    FROM ${tableName};
-  `);
-
-  return tableLengthQuery.data[0].length;
 }
 
 type AsyncQueryFunction = () => Promise<void>;

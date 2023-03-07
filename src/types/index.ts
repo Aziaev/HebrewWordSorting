@@ -112,6 +112,7 @@ export interface IWordRoot {
   words1: string;
   words: string;
   strings: IString[];
+  string: IString;
 }
 
 export const RootsSchema = [

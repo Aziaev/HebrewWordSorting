@@ -52,7 +52,7 @@ export const initDb = createAsyncThunk(
       await sw.createTable(ETable.nikud, NikudSchema);
       await sw.insert(ETable.nikud, nikudJson);
 
-      const roots = map(rootsJson, (root) => ({
+      const roots = map(rootsJson, (root: any) => ({
         ...root,
         ruLowerCase: root.ru.toLowerCase(),
         uaLowerCase: root.ua.toLowerCase(),

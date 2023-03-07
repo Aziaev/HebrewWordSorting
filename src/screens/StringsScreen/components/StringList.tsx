@@ -96,46 +96,38 @@ interface IListItemProps extends ListRenderItemInfo<IWordRoot> {
 }
 
 function ListItem({ item, extraData: { appLanguage } }: IListItemProps) {
-  return (
-    <>
-      {map(item.strings, (str) => {
-        const hasTime = str?.time?.time && str?.time?.pronouns;
+  const hasTime = item.string?.time?.time && item.string?.time?.pronouns;
 
-        return (
-          <View key={`${item.id}_${str.id}`} style={styles.card}>
-            <Text style={styles.translations}>
-              <Text>{item[appLanguage]}</Text>
+  return (
+    <View key={item.id} style={styles.card}>
+      <Text style={styles.translations}>
+        <Text>{item[appLanguage]}</Text>
+      </Text>
+      <View style={styles.hebrewWords}>
+        {hasTime ? (
+          <View style={styles.row}>
+            <Text
+              style={[styles.hebrewText, styles.word]}
+              adjustsFontSizeToFit
+              numberOfLines={1}
+            >
+              {item.string.words}
             </Text>
-            <View style={styles.hebrewWords}>
-              <Fragment key={str.id}>
-                {hasTime ? (
-                  <View style={styles.row}>
-                    <Text
-                      style={[styles.hebrewText, styles.word]}
-                      adjustsFontSizeToFit
-                      numberOfLines={1}
-                    >
-                      {str.words}
-                    </Text>
-                    <Text
-                      style={[styles.hebrewText, styles.auxWords]}
-                      adjustsFontSizeToFit
-                      numberOfLines={1}
-                    >
-                      {str?.time?.time} {str?.time?.pronouns}
-                    </Text>
-                  </View>
-                ) : (
-                  <Text style={[styles.hebrewText, { textAlign: "center" }]}>
-                    {str.words}
-                  </Text>
-                )}
-              </Fragment>
-            </View>
+            <Text
+              style={[styles.hebrewText, styles.auxWords]}
+              adjustsFontSizeToFit
+              numberOfLines={1}
+            >
+              {item.string?.time?.time} {item.string?.time?.pronouns}
+            </Text>
           </View>
-        );
-      })}
-    </>
+        ) : (
+          <Text style={[styles.hebrewText, { textAlign: "center" }]}>
+            {item.string?.words}
+          </Text>
+        )}
+      </View>
+    </View>
   );
 }
 

@@ -1,6 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { RootState } from "../../";
-import { queryCount, queryList } from "./strings.helpers";
+import { queryCount, queryList, queryNextPage } from "./strings.helpers";
 
 export enum ETable {
   strings = "strings",
@@ -41,7 +41,7 @@ export const fetchNextPage = createAsyncThunk(
 
     if (search && offset / limit < count / limit) {
       const newOffset = offset + limit;
-      const list = await queryList({
+      const list = await queryNextPage({
         search,
         limit,
         offset: newOffset,
