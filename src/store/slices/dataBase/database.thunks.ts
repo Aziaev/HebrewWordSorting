@@ -15,11 +15,9 @@ import { databaseSlice } from "./database";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { EAsyncStorageKey } from "../../constants";
 import SQLiteWrapper from "../../../common/SQLWrapper";
-import spisok1 from "../../../assets/json/spisok1.json";
 import strings from "../../../assets/json/stringsWithSortKey.json";
 import { database } from "../../../index";
 import map from "lodash/map";
-import { createLatinSortKey } from "../../../common/helpers";
 
 export enum ETable {
   strings = "strings",
@@ -34,19 +32,20 @@ export const initDb = createAsyncThunk(
   async (_, { dispatch }) => {
     const storedVersion = await AsyncStorage.getItem(EAsyncStorageKey.version);
 
-    if (storedVersion !== version) {
+    if (!storedVersion !== version) {
       // @ts-expect-error
       const sw = new SQLiteWrapper(database);
-
-      // const strings = map(spisok1, (item: any) => ({
-      //   ...item,
-      //   sortKey: createLatinSortKey(item.word),
-      // }));
 
       dispatch(databaseSlice.actions.setProgress("creating strings"));
       await sw.dropTable(ETable.strings);
       await sw.createTable(ETable.strings, StringSchema);
       await sw.insert(ETable.strings, strings);
+      await sw.query(
+        `CREATE INDEX IF NOT EXISTS stringsWordIndex ON strings(word);`
+      );
+      await sw.query(
+        `CREATE INDEX IF NOT EXISTS stringsSortKeyIndex ON strings(sortKey);`
+      );
 
       dispatch(databaseSlice.actions.setProgress("creating nikud"));
       await sw.dropTable(ETable.nikud);

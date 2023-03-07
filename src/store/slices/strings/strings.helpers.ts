@@ -1,6 +1,6 @@
 import SQLiteWrapper from "../../../common/SQLWrapper";
 import { database } from "../../../index";
-import { find, forEach, map } from "lodash";
+import { find, forEach, isEmpty, map } from "lodash";
 import { IString, IWordRoot } from "../../../types";
 import { ETable } from "./strings.thunks";
 import { createLatinSortKey, getIsHebrewText } from "../../../common/helpers";
@@ -31,17 +31,6 @@ export async function queryList({
   });
 }
 
-export async function queryStringsWithRoots() {
-  // @ts-expect-error
-  const sw = new SQLiteWrapper(database);
-
-  const transaction = await sw.query(
-    `SELECT count(*) FROM ${ETable.strings} as count`
-  );
-
-  return transaction.data[0]["count(*)"];
-}
-
 export async function queryCount() {
   // @ts-expect-error
   const sw = new SQLiteWrapper(database);
@@ -64,9 +53,11 @@ async function queryHebrewList({
 }) {
   // @ts-expect-error
   const sw = new SQLiteWrapper(database);
+  console.log("create tables");
   let strings = [];
   await sw.query(`DROP TABLE IF EXISTS stringList;`);
   await sw.query(`DROP TABLE IF EXISTS tempStringList;`);
+
   await sw.query(`
     CREATE TABLE IF NOT EXISTS stringList (
       id integer, 
@@ -90,7 +81,21 @@ async function queryHebrewList({
       sortKey text
     );
   `);
+  await sw.query(
+    `CREATE INDEX IF NOT EXISTS stringListWordIndex ON stringList(word);`
+  );
+  await sw.query(
+    `CREATE INDEX IF NOT EXISTS stringListSortKeyIndex ON stringList(sortKey);`
+  );
 
+  await sw.query(
+    `CREATE INDEX IF NOT EXISTS tempStringListWordIndex ON tempStringList(word);`
+  );
+  await sw.query(
+    `CREATE INDEX IF NOT EXISTS tempStringListSortKeyIndex ON tempStringList(sortKey);`
+  );
+
+  console.log("matchingRowsQuery");
   const matchingRowsQuery = await sw.query(
     `
       SELECT *
@@ -102,10 +107,12 @@ async function queryHebrewList({
     [search, `${search}%`]
   );
 
-  const firstMatchingRowId = matchingRowsQuery.data[0]?.id;
+  if (!isEmpty(matchingRowsQuery.data)) {
+    const firstMatchingRowId = matchingRowsQuery.data[0]?.id;
 
-  const matchingRowIndexQuery = await sw.query(
-    `
+    console.log("matchingRowIndexQuery");
+    const matchingRowIndexQuery = await sw.query(
+      `
     SELECT *, t.rowIndex
     FROM (
         SELECT id, sortKey, ROW_NUMBER() OVER(ORDER BY sortKey) rowIndex
@@ -113,91 +120,75 @@ async function queryHebrewList({
     ) t
     WHERE t.id = ?;
   `,
-    [firstMatchingRowId]
-  );
+      [firstMatchingRowId]
+    );
 
-  const sliceStartFrom: number =
-    matchingRowIndexQuery.data[0]?.rowIndex - 1 || 0;
-  const sliceEndWith = await queryTableLength("strings");
+    const sliceStartFrom: number =
+      matchingRowIndexQuery.data[0]?.rowIndex - 1 || 0;
+    const sliceEndWith = await queryTableLength("strings");
 
-  // copy to temp sliced table
-  const slicedStringsTable = await sw.query(
-    `
+    console.log("slicedStringsTable");
+    // copy to temp sliced table
+    const slicedStringsTable = await sw.query(
+      `
     SELECT *
     FROM strings
     ORDER BY sortKey ASC
     LIMIT ?,?;
   `,
-    [sliceStartFrom, sliceEndWith]
-  );
+      [sliceStartFrom, sliceEndWith]
+    );
 
-  sw.insert("tempStringList", slicedStringsTable.data);
+    sw.insert("tempStringList", slicedStringsTable.data);
 
-  const asyncQueries: AsyncQueryFunction[] = [];
+    const asyncQueries: AsyncQueryFunction[] = [];
 
-  const stringsLengthBefore = await queryTableLength("strings");
-  const stringListLengthBefore = await queryTableLength("stringList");
-  const tempStringListLengthBefore = await queryTableLength("tempStringList");
-
-  console.log({
-    stringsLengthBefore,
-    stringListLengthBefore,
-    tempStringListLengthBefore,
-  });
-
-  forEach(Array(search.length), async (_, index, collection) => {
-    asyncQueries.push(async () => {
-      const searchString = search.slice(0, collection.length - index);
-      const { data } = await sw.query(
-        `
+    forEach(Array(search.length), async (_, index, collection) => {
+      asyncQueries.push(async () => {
+        const searchString = search.slice(0, collection.length - index);
+        const { data } = await sw.query(
+          `
             SELECT *
             FROM tempStringList
             WHERE word = ?
             OR word LIKE ?
             ORDER BY sortKey ASC;
           `,
-        [searchString, `${searchString}%`]
-      );
+          [searchString, `${searchString}%`]
+        );
 
-      await sw.insert("stringList", data);
+        await sw.insert("stringList", data);
 
-      const selectedRowIds = map(data, ({ id }) => id);
+        const selectedRowIds = map(data, ({ id }) => id);
 
-      await sw.query(
-        `
+        await sw.query(
+          `
             DELETE FROM tempStringList WHERE id IN (?);
         `,
-        selectedRowIds
-      );
-
-      console.log({ selectedRowIds });
+          selectedRowIds
+        );
+      });
     });
-  });
 
-  await queryAll(asyncQueries);
+    await queryAll(asyncQueries);
 
-  const stringsLengthAfter = await queryTableLength("strings");
-  const stringListLengthAfter = await queryTableLength("stringList");
-  const tempStringListLengthAfter = await queryTableLength("tempStringList");
-
-  console.log({
-    stringsLengthAfter,
-    stringListLengthAfter,
-    tempStringListLengthAfter,
-  });
-
-  const stringListQuery = await sw.query(
-    `
+    const stringListQuery = await sw.query(
+      `
     SELECT *
     FROM stringList
     LIMIT ${offset}, ${limit}
     `
-  );
+    );
 
-  strings = stringListQuery?.data;
+    strings = stringListQuery?.data;
+  }
 
   const times = await queryTimes();
   const timeRColumnLinks = map(times, "r");
+
+  console.log("map strings");
+
+  await sw.query(`DROP TABLE tempStringList`);
 
   return await Promise.all(
     map(strings, async (item: IString) => {

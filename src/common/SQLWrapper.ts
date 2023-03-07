@@ -7,7 +7,7 @@ const SQLiteJSWrapper = function (db: WebSQLDatabase) {
     return await new Promise((resolve, reject) => {
       this.db.transaction(
         (tx) => {
-          console.log(query, params);
+          // console.log(query, params);
           tx.executeSql(
             query,
             params,

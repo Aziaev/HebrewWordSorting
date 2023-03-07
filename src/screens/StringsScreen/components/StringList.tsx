@@ -96,8 +96,6 @@ interface IListItemProps extends ListRenderItemInfo<IWordRoot> {
 }
 
 function ListItem({ item, extraData: { appLanguage } }: IListItemProps) {
-  console.log(item?.strings?.[0]);
-
   return (
     <>
       {map(item.strings, (str) => {
