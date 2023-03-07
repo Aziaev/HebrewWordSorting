@@ -12,7 +12,7 @@ export interface IStringsState {
 }
 
 const initialState: IStringsState = {
-  search: "א",
+  search: "אאבחן",
   error: null,
   status: EStatus.ready,
   list: [],
@@ -41,6 +41,8 @@ export const stringsSlice = createSlice({
       state.limit = action.payload.limit;
     });
     builder.addCase(searchByString.rejected, (state, action: any) => {
+      console.log(action.error);
+
       if (action.payload) {
         state.error = action.payload.errorMessage;
       } else {

@@ -100,11 +100,15 @@ export const TimesSchema = [
 
 export interface IWordRoot {
   id: string;
+  root: string;
   links: string;
   binyan: string;
   ru: string;
   ua: string;
   en: string;
+  ruLowerCase: string;
+  uaLowerCase: string;
+  enLowerCase: string;
   words1: string;
   words: string;
   strings: IString[];
@@ -138,12 +142,27 @@ export const RootsSchema = [
     notNull: false,
   },
   {
+    columnName: "ruLowerCase",
+    dataType: "text",
+    notNull: false,
+  },
+  {
     columnName: "ua",
     dataType: "text",
     notNull: false,
   },
   {
+    columnName: "uaLowerCase",
+    dataType: "text",
+    notNull: false,
+  },
+  {
     columnName: "en",
+    dataType: "text",
+    notNull: false,
+  },
+  {
+    columnName: "enLowerCase",
     dataType: "text",
     notNull: false,
   },

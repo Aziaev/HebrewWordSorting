@@ -1,9 +1,9 @@
 import SQLiteWrapper from "../../../common/SQLWrapper";
 import { database } from "../../../index";
-import { find, map } from "lodash";
-import { IString } from "../../../types";
+import { find, forEach, map } from "lodash";
+import { IString, IWordRoot } from "../../../types";
 import { ETable } from "./strings.thunks";
-import { getIsHebrewText } from "../../../common/helpers";
+import { createLatinSortKey, getIsHebrewText } from "../../../common/helpers";
 import { ELanguage } from "../../../common/constants";
 
 export async function queryList({
@@ -31,6 +31,17 @@ export async function queryList({
   });
 }
 
+export async function queryStringsWithRoots() {
+  // @ts-expect-error
+  const sw = new SQLiteWrapper(database);
+
+  const transaction = await sw.query(
+    `SELECT count(*) FROM ${ETable.strings} as count`
+  );
+
+  return transaction.data[0]["count(*)"];
+}
+
 export async function queryCount() {
   // @ts-expect-error
   const sw = new SQLiteWrapper(database);
@@ -54,26 +65,142 @@ async function queryHebrewList({
   // @ts-expect-error
   const sw = new SQLiteWrapper(database);
   let strings = [];
+  await sw.query(`DROP TABLE IF EXISTS stringList;`);
+  await sw.query(`DROP TABLE IF EXISTS tempStringList;`);
+  await sw.query(`
+    CREATE TABLE IF NOT EXISTS stringList (
+      id integer, 
+      root text,
+      words text,
+      word text,
+      r text,
+      links text,
+      sortKey text
+    );
+  `);
 
-  const query = await sw.query(
+  await sw.query(`
+    CREATE TABLE IF NOT EXISTS tempStringList (
+      id integer, 
+      root text,
+      words text,
+      word text,
+      r text,
+      links text,
+      sortKey text
+    );
+  `);
+
+  const matchingRowsQuery = await sw.query(
     `
-                        SELECT *
-                        FROM strings
-                        WHERE word = ?
-                        OR word LIKE ?
-                        ORDER BY sortKey ASC
-                        LIMIT ${offset}, ${limit}
-                      `,
+      SELECT *
+      FROM strings
+      WHERE word = ?
+      OR word LIKE ?
+      ORDER BY sortKey ASC;
+    `,
     [search, `${search}%`]
   );
 
-  strings = query?.data;
+  const firstMatchingRowId = matchingRowsQuery.data[0]?.id;
+
+  const matchingRowIndexQuery = await sw.query(
+    `
+    SELECT *, t.rowIndex
+    FROM (
+        SELECT id, sortKey, ROW_NUMBER() OVER(ORDER BY sortKey) rowIndex
+        FROM strings
+    ) t
+    WHERE t.id = ?;
+  `,
+    [firstMatchingRowId]
+  );
+
+  const sliceStartFrom: number =
+    matchingRowIndexQuery.data[0]?.rowIndex - 1 || 0;
+  const sliceEndWith = await queryTableLength("strings");
+
+  // copy to temp sliced table
+  const slicedStringsTable = await sw.query(
+    `
+    SELECT *
+    FROM strings
+    ORDER BY sortKey ASC
+    LIMIT ?,?;
+  `,
+    [sliceStartFrom, sliceEndWith]
+  );
+
+  sw.insert("tempStringList", slicedStringsTable.data);
+
+  const asyncQueries: AsyncQueryFunction[] = [];
+
+  const stringsLengthBefore = await queryTableLength("strings");
+  const stringListLengthBefore = await queryTableLength("stringList");
+  const tempStringListLengthBefore = await queryTableLength("tempStringList");
+
+  console.log({
+    stringsLengthBefore,
+    stringListLengthBefore,
+    tempStringListLengthBefore,
+  });
+
+  forEach(Array(search.length), async (_, index, collection) => {
+    asyncQueries.push(async () => {
+      const searchString = search.slice(0, collection.length - index);
+      const { data } = await sw.query(
+        `
+            SELECT *
+            FROM tempStringList
+            WHERE word = ?
+            OR word LIKE ?
+            ORDER BY sortKey ASC;
+          `,
+        [searchString, `${searchString}%`]
+      );
+
+      await sw.insert("stringList", data);
+
+      const selectedRowIds = map(data, ({ id }) => id);
+
+      await sw.query(
+        `
+            DELETE FROM tempStringList WHERE id IN (?);
+        `,
+        selectedRowIds
+      );
+
+      console.log({ selectedRowIds });
+    });
+  });
+
+  await queryAll(asyncQueries);
+
+  const stringsLengthAfter = await queryTableLength("strings");
+  const stringListLengthAfter = await queryTableLength("stringList");
+  const tempStringListLengthAfter = await queryTableLength("tempStringList");
+
+  console.log({
+    stringsLengthAfter,
+    stringListLengthAfter,
+    tempStringListLengthAfter,
+  });
+
+  const stringListQuery = await sw.query(
+    `
+    SELECT *
+    FROM stringList
+    LIMIT ${offset}, ${limit}
+    `
+  );
+
+  strings = stringListQuery?.data;
 
   const times = await queryTimes();
+  const timeRColumnLinks = map(times, "r");
 
   return await Promise.all(
     map(strings, async (item: IString) => {
-      const timeRColumnLinks = map(times, "r");
       const isVerb = item.r && timeRColumnLinks.includes(item.r);
 
       const result = await sw
@@ -104,38 +231,45 @@ export async function queryOtherLanguageList({
 }) {
   // @ts-expect-error
   const sw = new SQLiteWrapper(database);
+  const lowerCaseSearch = search.toLowerCase();
+
+  const sortKeyValue = createLatinSortKey(lowerCaseSearch);
+
   const { data: wordTranslations } = await sw.query(
     `
                         SELECT *
                         FROM roots
-                        WHERE ${appLanguage} = ?
-                        OR ${appLanguage} LIKE ?
-                        ORDER BY LOWER(${appLanguage}) ASC
+                        WHERE ${appLanguage}LowerCase = ?
+                        OR ${appLanguage}LowerCase LIKE ?
+                        OR ${appLanguage}LowerCase LIKE ?
+                        ORDER BY ${appLanguage}LowerCase ASC
                         LIMIT ${offset}, ${limit}
                       `,
-    [search, `${search}%`]
+    [sortKeyValue, `${sortKeyValue}%`, `% ${sortKeyValue}%`]
   );
 
   const times = await queryTimes();
+  const timeRColumnLinks = map(times, "r");
 
   return await Promise.all(
-    map(wordTranslations, async (item: IString) => {
-      const timeRColumnLinks = map(times, "r");
-      const isVerb = item.r && timeRColumnLinks.includes(item.r);
-
+    map(wordTranslations, async (wordRoot: IWordRoot) => {
       const { data } = await sw
         .table(ETable.strings)
-        .where("root", `${item.root}`, "=", "AND")
-        .where("links", `${item.links}`, "=")
+        .where("root", `${wordRoot.root}`, "=", "AND")
+        .where("links", `${wordRoot.links}`, "=")
         .select(null);
 
-      const strings = map(data, (str) => ({
-        ...str,
-        time: isVerb && find(times, { r: str.r }),
-      }));
+      const strings = map(data, (str) => {
+        const isVerb = str.r && timeRColumnLinks.includes(str.r);
+
+        return {
+          ...str,
+          time: isVerb && find(times, { r: str.r }),
+        };
+      });
 
       return {
-        ...item,
+        ...wordRoot,
         strings,
       };
     })
@@ -148,4 +282,26 @@ async function queryTimes() {
   const { data } = await sw.table(ETable.times).select(null);
 
   return data;
+}
+
+async function queryTableLength(tableName: string) {
+  // @ts-expect-error
+  const sw = new SQLiteWrapper(database);
+
+  const tableLengthQuery = await sw.query(`
+    SELECT COUNT(*) as length
+    FROM ${tableName};
+  `);
+
+  return tableLengthQuery.data[0].length;
+}
+
+type AsyncQueryFunction = () => Promise<void>;
+
+async function queryAll(
+  asyncQueryFunctions: AsyncQueryFunction[]
+): Promise<void> {
+  for (const asyncFunction of asyncQueryFunctions) {
+    await asyncFunction();
+  }
 }

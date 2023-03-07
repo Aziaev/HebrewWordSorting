@@ -2,8 +2,6 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { RootState } from "../../";
 import { queryCount, queryList } from "./strings.helpers";
 
-export const dbName = "HebrewWordSorting";
-
 export enum ETable {
   strings = "strings",
   roots = "roots",

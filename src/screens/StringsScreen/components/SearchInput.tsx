@@ -5,19 +5,25 @@ import {
 } from "../../../store/slices/strings/strings.hooks";
 import { INPUT_PLACEHOLDER } from "../../../common/constants";
 import * as React from "react";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useAppSelector } from "../../../store/slices/app/app.hooks";
 import Colors from "../../../common/constants/Colors";
 import { getIsHebrewText } from "../../../common/helpers";
+import { debounce } from "lodash";
 
 export default function SearchInput() {
   const { appLanguage } = useAppSelector();
   const { search } = useStringsStateSelector();
   const { setSearch, searchByString } = useStringsDispatchedActions();
 
+  const debouncedSearchByString = useMemo(
+    () => debounce(searchByString, 400),
+    [searchByString]
+  );
+
   useEffect(() => {
-    searchByString();
-  }, [search, searchByString, appLanguage]);
+    debouncedSearchByString();
+  }, [search, searchByString, appLanguage, debouncedSearchByString]);
 
   return (
     <TextInput

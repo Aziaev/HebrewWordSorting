@@ -1,6 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { version } from "../../../assets/json/version.json";
-import * as SQLite from "expo-sqlite";
 import nikudJson from "../../../assets/json/oglasovki.json";
 import rootsJson from "../../../assets/json/kornevoy_slovar.json";
 import timesJson from "../../../assets/json/times.json";
@@ -16,9 +15,11 @@ import { databaseSlice } from "./database";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { EAsyncStorageKey } from "../../constants";
 import SQLiteWrapper from "../../../common/SQLWrapper";
+import spisok1 from "../../../assets/json/spisok1.json";
 import strings from "../../../assets/json/stringsWithSortKey.json";
-
-export const dbName = "HebrewWordSorting";
+import { database } from "../../../index";
+import map from "lodash/map";
+import { createLatinSortKey } from "../../../common/helpers";
 
 export enum ETable {
   strings = "strings",
@@ -33,10 +34,14 @@ export const initDb = createAsyncThunk(
   async (_, { dispatch }) => {
     const storedVersion = await AsyncStorage.getItem(EAsyncStorageKey.version);
 
-    if (!storedVersion !== version) {
-      const db = SQLite.openDatabase(dbName);
+    if (storedVersion !== version) {
       // @ts-expect-error
-      const sw = new SQLiteWrapper(db);
+      const sw = new SQLiteWrapper(database);
+
+      // const strings = map(spisok1, (item: any) => ({
+      //   ...item,
+      //   sortKey: createLatinSortKey(item.word),
+      // }));
 
       dispatch(databaseSlice.actions.setProgress("creating strings"));
       await sw.dropTable(ETable.strings);
@@ -48,10 +53,17 @@ export const initDb = createAsyncThunk(
       await sw.createTable(ETable.nikud, NikudSchema);
       await sw.insert(ETable.nikud, nikudJson);
 
+      const roots = map(rootsJson, (root) => ({
+        ...root,
+        ruLowerCase: root.ru.toLowerCase(),
+        uaLowerCase: root.ua.toLowerCase(),
+        enLowerCase: root.en.toLowerCase(),
+      }));
+
       dispatch(databaseSlice.actions.setProgress("creating roots"));
       await sw.dropTable(ETable.roots);
       await sw.createTable(ETable.roots, RootsSchema);
-      await sw.insert(ETable.roots, rootsJson);
+      await sw.insert(ETable.roots, roots);
 
       dispatch(databaseSlice.actions.setProgress("creating times"));
       await sw.dropTable(ETable.times);

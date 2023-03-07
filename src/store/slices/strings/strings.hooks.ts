@@ -17,10 +17,6 @@ export function useStringsDispatchedActions() {
         console.log("fetchNextPage");
         void dispatch(fetchNextPage());
       },
-      toggleLanguage: () => {
-        console.log("toggleLanguage");
-        void dispatch(stringsSlice.actions.toggleLanguage());
-      },
       setSearch: (search: string) => {
         console.log("setSearch");
         dispatch(stringsSlice.actions.setSearch(search));

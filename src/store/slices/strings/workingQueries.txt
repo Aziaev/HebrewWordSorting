@@ -1,0 +1,53 @@
+// get first index of searched string
+SELECT MIN(cnt) from (
+  select id, name, (
+    select count(*) from roots b
+    where a.name >= b.name
+  ) as cnt
+  from roots a
+  WHERE name = "глоб"
+  OR name LIKE "глоб%"
+  OR name LIKE "% глоб%"
+);
+
+
+// select rows from first index till end
+SELECT *
+FROM roots
+ORDER BY name ASC
+LIMIT (
+  SELECT MIN(cnt) - 1
+  FROM (
+    SELECT id, name, (
+      SELECT COUNT(*) as length
+      FROM roots b
+      WHERE a.name >= b.name
+    ) AS cnt
+    FROM roots a
+    WHERE name = "глоб"
+    OR name LIKE "глоб%"
+    OR name LIKE "% глоб%"
+  ) subquery
+), (select count() from roots);
+
+// create new table
+CREATE TABLE stringList AS
+SELECT *
+FROM roots
+ORDER BY name ASC
+LIMIT (
+  SELECT MIN(cnt) - 1
+  FROM (
+    SELECT id, name, (
+      SELECT COUNT(*) as length
+      FROM roots b
+      WHERE a.name >= b.name
+    ) AS cnt
+    FROM roots a
+    WHERE name = "глоб"
+    OR name LIKE "глоб%"
+    OR name LIKE "% глоб%"
+  ) subquery
+), (select count() from roots);
+
+select count() from stringList
