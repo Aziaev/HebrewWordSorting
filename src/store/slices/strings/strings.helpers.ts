@@ -123,23 +123,21 @@ async function queryHebrewList({
       [firstMatchingRowId]
     );
 
-    const sliceStartFrom: number =
-      matchingRowIndexQuery.data[0]?.rowIndex - 1 || 0;
-    const sliceEndWith = await queryTableLength("strings");
+    const sliceStartFrom: number = matchingRowIndexQuery.data[0]?.rowIndex - 1;
 
     console.log("slicedStringsTable");
     // copy to temp sliced table
-    const slicedStringsTable = await sw.query(
+    await sw.query(
       `
+    INSERT INTO tempStringList
     SELECT *
     FROM strings
     ORDER BY sortKey ASC
-    LIMIT ?,?;
-  `,
-      [sliceStartFrom, sliceEndWith]
+    LIMIT -1 
+    OFFSET ${sliceStartFrom};
+   
+    `
     );
-
-    sw.insert("tempStringList", slicedStringsTable.data);
 
     const asyncQueries: AsyncQueryFunction[] = [];
 
