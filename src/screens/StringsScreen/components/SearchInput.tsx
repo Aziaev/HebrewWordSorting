@@ -1,4 +1,4 @@
-import { TextInput } from "react-native";
+import { TextInput, View } from "react-native";
 import {
   useStringsDispatchedActions,
   useStringsStateSelector,
@@ -10,6 +10,7 @@ import { useAppSelector } from "../../../store/slices/app/app.hooks";
 import Colors from "../../../common/constants/Colors";
 import { getIsHebrewText } from "../../../common/helpers";
 import { debounce } from "lodash";
+import { FontAwesome } from "@expo/vector-icons";
 
 export default function SearchInput() {
   const { appLanguage } = useAppSelector();
@@ -26,31 +27,57 @@ export default function SearchInput() {
   }, [search, searchByString, appLanguage, debouncedSearchByString]);
 
   return (
-    <TextInput
-      // @ts-expect-error
-      style={getTextInputStyles(search)}
-      value={search}
-      onChangeText={setSearch}
-      placeholder={INPUT_PLACEHOLDER[appLanguage]}
-      placeholderTextColor={Colors.grey6}
-    />
+    // @ts-expect-error
+    <View style={getStyles(search).searchInput}>
+      <TextInput
+        // @ts-expect-error
+        style={getStyles(search).textInput}
+        value={search}
+        onChangeText={setSearch}
+        placeholder={INPUT_PLACEHOLDER[appLanguage]}
+        placeholderTextColor={Colors.grey5}
+      />
+      {search && (
+        <FontAwesome
+          style={getStyles(search).closeIcon}
+          name="close"
+          backgroundColor="#fff"
+          color={Colors.grey5}
+          onPress={() => setSearch("")}
+        />
+      )}
+    </View>
   );
 }
 
-function getTextInputStyles(search: string) {
+function getStyles(search: string) {
   return {
-    paddingTop: 15,
-    paddingBottom: 5,
-    paddingLeft: 20,
-    paddingRight: 20,
-    fontSize: 24,
-    fontFamily: getIsHebrewText(search) ? "David" : undefined,
-    fontWeight: "700",
-    borderBottomColor: Colors.grey6,
-    borderBottomWidth: 1,
-    textAlign: getDirection(search),
-    width: "100%",
-    height: 55,
+    searchInput: {
+      width: "100%",
+      display: "flex",
+      flexDirection: getIsHebrewText(search) ? "row-reverse" : "row",
+      borderBottomColor: Colors.grey5,
+      borderBottomWidth: 1,
+    },
+    closeIcon: {
+      paddingTop: 25,
+      paddingBottom: 5,
+      paddingLeft: 20,
+      fontSize: 18,
+      paddingRight: 20,
+    },
+    textInput: {
+      flex: 1,
+      paddingTop: 15,
+      paddingBottom: 5,
+      paddingLeft: 20,
+      paddingRight: 20,
+      fontSize: 18,
+      fontFamily: getIsHebrewText(search) ? "David" : undefined,
+      fontWeight: "500",
+      textAlign: getDirection(search),
+      height: 55,
+    },
   };
 }
 
