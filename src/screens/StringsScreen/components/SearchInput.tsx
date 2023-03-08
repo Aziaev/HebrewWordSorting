@@ -60,7 +60,7 @@ function getStyles(search: string) {
       borderBottomWidth: 1,
     },
     closeIcon: {
-      paddingTop: 25,
+      paddingTop: getIsHebrewText(search) ? 23 : 25,
       paddingBottom: 5,
       paddingLeft: 20,
       fontSize: 18,

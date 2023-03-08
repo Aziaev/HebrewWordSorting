@@ -100,7 +100,7 @@ function ListItem({ item, extraData: { appLanguage } }: IListItemProps) {
 
   return (
     <View key={item.id} style={styles.card}>
-      <Text style={styles.translations}>
+      <Text style={styles.translations} adjustsFontSizeToFit numberOfLines={1}>
         <Text>{item[appLanguage]}</Text>
       </Text>
       <View style={styles.hebrewWords}>
@@ -133,7 +133,7 @@ function ListItem({ item, extraData: { appLanguage } }: IListItemProps) {
 
 const styles = StyleSheet.create({
   card: {
-    marginBottom: 16,
+    marginBottom: 2,
     borderColor: Colors.grey2,
     borderWidth: 1,
     borderRadius: 5,
@@ -141,18 +141,20 @@ const styles = StyleSheet.create({
     marginRight: 20,
   },
   translations: {
+    height: 32,
     backgroundColor: Colors.grey2,
     width: "100%",
     paddingBottom: 5,
-    paddingTop: 5,
+    paddingTop: 3,
     fontSize: 16,
     textAlign: "center",
     justifyContent: "center",
     alignContent: "center",
   },
   hebrewWords: {
+    height: 40,
     width: "100%",
-    paddingTop: 8,
+    paddingTop: 4,
     paddingBottom: 8,
     paddingLeft: 20,
     paddingRight: 20,
