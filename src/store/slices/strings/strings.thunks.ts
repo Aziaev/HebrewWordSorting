@@ -38,7 +38,7 @@ export const fetchNextPage = createAsyncThunk(
 
     const count = await queryCount();
 
-    if (search && offset / limit < count / limit) {
+    if (offset / limit < count / limit) {
       const newOffset = offset + limit;
       const list = await queryNextPage({
         search,
