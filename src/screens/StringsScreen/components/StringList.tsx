@@ -9,7 +9,6 @@ import { isEmpty, map, noop } from "lodash";
 import { IString, IWordRoot } from "../../../types";
 import { ListRenderItemInfo } from "@shopify/flash-list/src/FlashListProps";
 import Colors from "../../../common/constants/Colors";
-import { useAppSelector } from "../../../store/slices/app/app.hooks";
 import { ELanguage } from "../../../common/constants";
 import { Fragment } from "react";
 import { getIsHebrewText } from "../../../common/helpers";
@@ -17,12 +16,12 @@ import { getIsHebrewText } from "../../../common/helpers";
 export default function StringList() {
   const { list, search } = useStringsStateSelector();
   const { fetchNextPage } = useStringsDispatchedActions();
-  const { appLanguage } = useAppSelector();
+  const { language } = useStringsStateSelector();
   const isHebrewSearch = getIsHebrewText(search);
 
   return (
     <FlashList<IString | IWordRoot>
-      extraData={{ appLanguage, search }}
+      extraData={{ language, search }}
       data={list}
       estimatedItemSize={100}
       // @ts-expect-error
@@ -36,14 +35,14 @@ export default function StringList() {
 interface IHebrewListItemProps extends ListRenderItemInfo<IString> {
   item: IString;
   extraData: {
-    appLanguage: ELanguage.ua | ELanguage.ru | ELanguage.en;
+    language: ELanguage.ua | ELanguage.ru | ELanguage.en;
     search: string;
   };
 }
 
 function HebrewListItem({
   item,
-  extraData: { appLanguage },
+  extraData: { language },
 }: IHebrewListItemProps) {
   const hasTime = item?.time?.time && item?.time?.pronouns;
 
@@ -52,7 +51,7 @@ function HebrewListItem({
       <Text style={styles.translations}>
         {map(item.translations, (translation, index, collection) => (
           <Fragment key={translation.id}>
-            <Text>{translation[appLanguage]}</Text>
+            <Text>{translation[language]}</Text>
             {index > 0 && index <= collection.length - 1 && (
               <Text key={translation.id}>, </Text>
             )}
@@ -90,18 +89,18 @@ function HebrewListItem({
 interface IListItemProps extends ListRenderItemInfo<IWordRoot> {
   item: IWordRoot;
   extraData: {
-    appLanguage: ELanguage.ua | ELanguage.ru | ELanguage.en;
+    language: ELanguage.ua | ELanguage.ru | ELanguage.en;
     search: string;
   };
 }
 
-function ListItem({ item, extraData: { appLanguage } }: IListItemProps) {
+function ListItem({ item, extraData: { language } }: IListItemProps) {
   const hasTime = item.string?.time?.time && item.string?.time?.pronouns;
 
   return (
     <View key={item.id} style={styles.card}>
       <Text style={styles.translations} adjustsFontSizeToFit numberOfLines={1}>
-        <Text>{item[appLanguage]}</Text>
+        <Text>{item[language]}</Text>
       </Text>
       <View style={styles.hebrewWords}>
         {hasTime ? (
@@ -133,7 +132,7 @@ function ListItem({ item, extraData: { appLanguage } }: IListItemProps) {
 
 const styles = StyleSheet.create({
   card: {
-    marginBottom: 2,
+    marginBottom: 3,
     borderColor: Colors.grey2,
     borderWidth: 1,
     borderRadius: 5,

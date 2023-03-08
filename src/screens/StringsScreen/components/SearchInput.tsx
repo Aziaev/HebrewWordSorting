@@ -6,16 +6,16 @@ import {
 import { INPUT_PLACEHOLDER } from "../../../common/constants";
 import * as React from "react";
 import { useEffect, useMemo } from "react";
-import { useAppSelector } from "../../../store/slices/app/app.hooks";
 import Colors from "../../../common/constants/Colors";
 import { getIsHebrewText } from "../../../common/helpers";
 import { debounce } from "lodash";
 import { FontAwesome } from "@expo/vector-icons";
+import { useAppSelector } from "../../../store/slices/app/app.hooks";
 
 export default function SearchInput() {
-  const { appLanguage } = useAppSelector();
   const { search } = useStringsStateSelector();
   const { setSearch, searchByString } = useStringsDispatchedActions();
+  const { appLanguage } = useAppSelector();
 
   const debouncedSearchByString = useMemo(
     () => debounce(searchByString, 400),
@@ -24,7 +24,7 @@ export default function SearchInput() {
 
   useEffect(() => {
     debouncedSearchByString();
-  }, [search, searchByString, appLanguage, debouncedSearchByString]);
+  }, [search, searchByString, debouncedSearchByString]);
 
   return (
     // @ts-expect-error

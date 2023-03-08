@@ -27,3 +27,15 @@ export const APP_TITLE = {
   [ELanguage.ua]: "Сортувальник слів",
   [ELanguage.en]: "Word sorter",
 };
+
+export const SELECT_APP_LANGUAGE = {
+  [ELanguage.ru]: "Выберите язык приложения",
+  [ELanguage.ua]: "Виберіть мову програми",
+  [ELanguage.en]: "Select app language",
+};
+
+export const SELECTED_APP_LANGUAGE = {
+  [ELanguage.ru]: "Выбран язык: Русский",
+  [ELanguage.ua]: "Вибрана мова: Український",
+  [ELanguage.en]: "Selected language: English",
+};

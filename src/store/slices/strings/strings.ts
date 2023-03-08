@@ -10,7 +10,7 @@ export interface IStringsState {
   list: IString[] | IWordRoot[];
   limit: number;
   offset: number;
-  language: ELanguage;
+  language: ELanguage.ru | ELanguage.ua | ELanguage.en;
 }
 
 const initialState: IStringsState = {
@@ -30,13 +30,12 @@ export const stringsSlice = createSlice({
     setSearch(state, action: PayloadAction<string>) {
       state.search = action.payload;
     },
-    setLanguage(state, action: PayloadAction<ELanguage>) {
+    setLanguage(
+      state,
+      action: PayloadAction<ELanguage.ru | ELanguage.ua | ELanguage.en>
+    ) {
       console.log("setLanguage");
       state.language = action.payload;
-      state.search = "";
-      state.list = [];
-      state.limit = initialState.limit;
-      state.offset = initialState.offset;
     },
   },
   extraReducers: (builder) => {

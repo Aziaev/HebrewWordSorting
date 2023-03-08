@@ -10,12 +10,12 @@ export async function queryList({
   search,
   limit,
   offset,
-  appLanguage,
+  language,
 }: {
   search: string;
   limit: number;
   offset: number;
-  appLanguage: ELanguage;
+  language: ELanguage;
 }) {
   const isHebrewSearch = getIsHebrewText(search);
 
@@ -27,7 +27,7 @@ export async function queryList({
     search,
     limit,
     offset,
-    appLanguage,
+    language,
   });
 }
 
@@ -158,19 +158,78 @@ async function queryHebrewList({
     forEach(Array(search.length), async (_, index, collection) => {
       asyncQueries.push(async () => {
         const searchString = search.slice(0, collection.length - index);
-        const { data } = await sw.query(
-          `
+        if (index === 0) {
+          const { data: fullMatchData } = await sw.query(
+            `
+            SELECT *
+            FROM tempStringList
+            WHERE word = ?
+            ORDER BY sortKey ASC;
+          `,
+            [searchString]
+          );
+          const fullMatchRowIds = map(fullMatchData, ({ id }) => id);
+          sw.table("tempStringList").whereIn("id", fullMatchRowIds).delete();
+
+          const { data: likeMatchData } = await sw.query(
+            `
+            SELECT *
+            FROM tempStringList
+            WHERE word LIKE ?
+            ORDER BY sortKey ASC;
+          `,
+            [`${searchString}%`]
+          );
+          const likeMatchDataRowIds = map(likeMatchData, ({ id }) => id);
+          sw.table("tempStringList")
+            .whereIn("id", likeMatchDataRowIds)
+            .delete();
+          const { data: inSentenceMatchData } = await sw.query(
+            `
+            SELECT *
+            FROM tempStringList
+            WHERE word LIKE ?
+            ORDER BY sortKey ASC;
+          `,
+            [`% ${searchString}%`]
+          );
+          const inSentenseMatchDataRowIds = map(
+            inSentenceMatchData,
+            ({ id }) => id
+          );
+          sw.table("tempStringList")
+            .whereIn("id", inSentenseMatchDataRowIds)
+            .delete();
+
+          await sw.insert("stringList", [
+            ...fullMatchData,
+            ...likeMatchData,
+            ...inSentenceMatchData,
+          ]);
+
+          sw.table("tempStringList")
+            .whereIn("id", [
+              ...fullMatchRowIds,
+              ...likeMatchDataRowIds,
+              ...inSentenseMatchDataRowIds,
+            ])
+            .delete();
+        } else {
+          const { data } = await sw.query(
+            `
             SELECT *
             FROM tempStringList
             WHERE word = ?
             OR word LIKE ?
             ORDER BY sortKey ASC;
           `,
-          [searchString, `${searchString}%`]
-        );
-        await sw.insert("stringList", data);
-        const selectedRowIds = map(data, ({ id }) => id);
-        sw.table("tempStringList").whereIn("id", selectedRowIds).delete();
+            [searchString, `${searchString}%`]
+          );
+          await sw.insert("stringList", data);
+          const selectedRowIds = map(data, ({ id }) => id);
+
+          sw.table("tempStringList").whereIn("id", selectedRowIds).delete();
+        }
       });
     });
 
@@ -250,12 +309,12 @@ export async function queryOtherLanguageList({
   search,
   limit,
   offset,
-  appLanguage,
+  language,
 }: {
   search: string;
   limit: number;
   offset: number;
-  appLanguage: ELanguage;
+  language: ELanguage;
 }) {
   // @ts-expect-error
   const sw = new SQLiteWrapper(database);
@@ -280,7 +339,7 @@ export async function queryOtherLanguageList({
       INSERT INTO rootList
       SELECT *
       FROM roots
-      ORDER BY ${appLanguage}LowerCase ASC;
+      ORDER BY ${language}LowerCase ASC;
     `);
 
     const rootListQuery = await sw.query(`
@@ -295,10 +354,10 @@ export async function queryOtherLanguageList({
       `
       SELECT *
       FROM roots
-      WHERE ${appLanguage}LowerCase = ?
-      OR ${appLanguage}LowerCase LIKE ?
-      OR ${appLanguage}LowerCase LIKE ?
-      ORDER BY ${appLanguage}LowerCase ASC
+      WHERE ${language}LowerCase = ?
+      OR ${language}LowerCase LIKE ?
+      OR ${language}LowerCase LIKE ?
+      ORDER BY ${language}LowerCase ASC
       LIMIT 1;
     `,
       [lowerCaseSearch, `${lowerCaseSearch}%`, `% ${lowerCaseSearch}%`]
@@ -311,7 +370,7 @@ export async function queryOtherLanguageList({
       `
       SELECT *, t.rowIndex
       FROM (
-          SELECT id, ${appLanguage}LowerCase, ROW_NUMBER() OVER(ORDER BY ${appLanguage}LowerCase) rowIndex
+          SELECT id, ${language}LowerCase, ROW_NUMBER() OVER(ORDER BY ${language}LowerCase) rowIndex
           FROM roots
       ) t
       WHERE t.id = ?
@@ -326,7 +385,7 @@ export async function queryOtherLanguageList({
         INSERT INTO tempRootList
         SELECT *
         FROM roots
-        ORDER BY ${appLanguage}LowerCase ASC
+        ORDER BY ${language}LowerCase ASC
         LIMIT -1 
         OFFSET ${sliceStartFrom};
     `);
@@ -339,20 +398,69 @@ export async function queryOtherLanguageList({
           0,
           collection.length - index
         );
-        const { data } = await sw.query(
-          `
+        if (index === 0) {
+          const { data: fullMatchData } = await sw.query(
+            `
             SELECT *
             FROM tempRootList
-            WHERE ${appLanguage}LowerCase = ?
-            OR ${appLanguage}LowerCase LIKE ?
-            OR ${appLanguage}LowerCase LIKE ?
-            ORDER BY ${appLanguage}LowerCase ASC;
+            WHERE ${language}LowerCase = ?
+            ORDER BY ${language}LowerCase ASC;
           `,
-          [searchString, `${searchString}%`, `% ${searchString}%`]
-        );
-        await sw.insert("rootList", data);
-        const selectedRowIds = map(data, ({ id }) => id);
-        sw.table("tempRootList").whereIn("id", selectedRowIds).delete();
+            [searchString]
+          );
+          const fullMatchRowIds = map(fullMatchData, ({ id }) => id);
+          sw.table("tempRootList").whereIn("id", fullMatchRowIds).delete();
+
+          const { data: likeMatchData } = await sw.query(
+            `
+            SELECT *
+            FROM tempRootList
+            WHERE ${language}LowerCase LIKE ?
+            ORDER BY ${language}LowerCase ASC;
+          `,
+            [`${searchString}%`]
+          );
+          const likeMatchDataRowIds = map(likeMatchData, ({ id }) => id);
+          sw.table("tempRootList").whereIn("id", likeMatchDataRowIds).delete();
+
+          const { data: inSentenceMatchData } = await sw.query(
+            `
+            SELECT *
+            FROM tempRootList
+            WHERE ${language}LowerCase LIKE ?
+            ORDER BY ${language}LowerCase ASC;
+          `,
+            [`% ${searchString}%`]
+          );
+          const inSentenseMatchDataRowIds = map(
+            inSentenceMatchData,
+            ({ id }) => id
+          );
+          sw.table("tempRootList")
+            .whereIn("id", inSentenseMatchDataRowIds)
+            .delete();
+
+          await sw.insert("rootList", [
+            ...fullMatchData,
+            ...likeMatchData,
+            ...inSentenceMatchData,
+          ]);
+        } else {
+          const { data } = await sw.query(
+            `
+            SELECT *
+            FROM tempRootList
+            WHERE ${language}LowerCase = ?
+            OR ${language}LowerCase LIKE ?
+            OR ${language}LowerCase LIKE ?
+            ORDER BY ${language}LowerCase ASC;
+          `,
+            [searchString, `${searchString}%`, `% ${searchString}%`]
+          );
+          await sw.insert("rootList", data);
+          const selectedRowIds = map(data, ({ id }) => id);
+          sw.table("tempRootList").whereIn("id", selectedRowIds).delete();
+        }
       });
     });
 

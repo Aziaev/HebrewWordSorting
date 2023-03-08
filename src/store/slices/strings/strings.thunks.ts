@@ -14,7 +14,7 @@ export const searchByString = createAsyncThunk(
   "strings/searchByString",
   async (_, { getState }) => {
     const state = getState() as RootState;
-    const { appLanguage } = state.app;
+    const { language } = state.strings;
     const { search } = state.strings;
     const limit = 30;
     const offset = 0;
@@ -23,7 +23,7 @@ export const searchByString = createAsyncThunk(
       search,
       limit,
       offset,
-      appLanguage,
+      language,
     });
 
     return { list, limit, offset };
@@ -38,7 +38,7 @@ export const fetchNextPage = createAsyncThunk(
 
     const count = await queryCount();
 
-    if (offset / limit < count / limit) {
+    if (search && offset / limit < count / limit) {
       const newOffset = offset + limit;
       const list = await queryNextPage({
         search,

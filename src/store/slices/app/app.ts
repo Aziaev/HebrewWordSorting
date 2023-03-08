@@ -13,7 +13,7 @@ export const appSlice = createSlice({
   name: "appSlice",
   initialState,
   reducers: {
-    setLanguage(
+    setAppLanguage(
       state,
       action: PayloadAction<ELanguage.ru | ELanguage.ua | ELanguage.en>
     ) {

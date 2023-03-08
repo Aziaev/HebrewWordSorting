@@ -9,8 +9,8 @@ export function useAppDispatchedActions() {
 
   return useMemo(
     () => ({
-      setLanguage: (lang: ELanguage.ru | ELanguage.ua | ELanguage.en) =>
-        dispatch(appSlice.actions.setLanguage(lang)),
+      setAppLanguage: (lang: ELanguage.ru | ELanguage.ua | ELanguage.en) =>
+        dispatch(appSlice.actions.setAppLanguage(lang)),
     }),
     [dispatch]
   );

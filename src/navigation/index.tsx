@@ -1,3 +1,4 @@
+import { FontAwesome } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { DefaultTheme, NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -16,6 +17,7 @@ import DBLoadingScreen from "../screens/DBLoadingScreen";
 import { APP_TITLE } from "../common/constants";
 import TabBarButton from "../common/components/TabBarButton";
 import { useAppSelector } from "../store/slices/app/app.hooks";
+import { Pressable } from "react-native";
 
 export default function Navigation() {
   return (
@@ -90,8 +92,33 @@ function BottomTabNavigator() {
             justifyContent: "center",
             color: Colors.tint,
           },
+          headerRight: () => (
+            <Pressable
+              onPress={() => navigation.navigate("Settings")}
+              style={({ pressed }) => ({
+                opacity: pressed ? 0.5 : 1,
+              })}
+            >
+              <FontAwesome
+                name="gear"
+                size={25}
+                color={Colors.accentColor}
+                style={{ marginRight: 20 }}
+              />
+            </Pressable>
+          ),
         })}
       />
     </BottomTab.Navigator>
   );
+}
+
+/**
+ * You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
+ */
+function TabBarIcon(props: {
+  name: React.ComponentProps<typeof FontAwesome>["name"];
+  color: string;
+}) {
+  return <FontAwesome size={20} style={{ marginBottom: -3 }} {...props} />;
 }
