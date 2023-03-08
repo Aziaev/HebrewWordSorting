@@ -34,7 +34,6 @@ export const fetchNextPage = createAsyncThunk(
   "strings/fetchNextPage",
   async (_, { getState }: { getState: () => unknown }) => {
     const state = getState() as RootState;
-    const { appLanguage } = state.app;
     const { limit, offset, search } = state.strings;
 
     const count = await queryCount();
@@ -45,7 +44,6 @@ export const fetchNextPage = createAsyncThunk(
         search,
         limit,
         offset: newOffset,
-        appLanguage,
       });
 
       return { list, limit, offset: newOffset };

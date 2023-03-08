@@ -35,24 +35,20 @@ export async function queryNextPage({
   search,
   limit,
   offset,
-  appLanguage,
 }: {
   search: string;
   limit: number;
   offset: number;
-  appLanguage: ELanguage;
 }) {
   const isHebrewSearch = getIsHebrewText(search);
 
   const listQueryFunction = isHebrewSearch
     ? queryHebrewNextPage
-    : queryOtherLanguageList;
+    : queryOtherLanguageNextPage;
 
   return await listQueryFunction({
-    search,
     limit,
     offset,
-    appLanguage,
   });
 }
 
@@ -99,8 +95,27 @@ async function queryHebrewList({
     `CREATE INDEX IF NOT EXISTS stringListSortKeyIndex ON stringList(sortKey);`
   );
 
-  const matchingRowsQuery = await sw.query(
-    `
+  let matchingRowsQuery;
+
+  if (!search) {
+    // copy to all to stringList
+    await sw.query(`
+        INSERT INTO stringList
+        SELECT *
+        FROM strings
+        ORDER BY sortKey ASC;
+    `);
+
+    const stringListQuery = await sw.query(`
+      SELECT *
+      FROM stringList
+      LIMIT ${offset}, ${limit}
+    `);
+
+    strings = stringListQuery?.data;
+  } else {
+    matchingRowsQuery = await sw.query(
+      `
       SELECT *
       FROM strings
       WHERE word = ?
@@ -108,10 +123,11 @@ async function queryHebrewList({
       ORDER BY sortKey ASC
       LIMIT 1;
     `,
-    [search, `${search}%`]
-  );
+      [search, `${search}%`]
+    );
+  }
 
-  if (!isEmpty(matchingRowsQuery.data)) {
+  if (!isEmpty(matchingRowsQuery?.data)) {
     const firstMatchingRowId = matchingRowsQuery.data[0]?.id;
     const matchingRowIndexQuery = await sw.query(
       `
@@ -197,7 +213,6 @@ async function queryHebrewNextPage({
   limit,
   offset,
 }: {
-  search: string;
   limit: number;
   offset: number;
 }) {
@@ -242,7 +257,6 @@ export async function queryOtherLanguageList({
   offset: number;
   appLanguage: ELanguage;
 }) {
-  console.log("creating tables");
   // @ts-expect-error
   const sw = new SQLiteWrapper(database);
   let roots = [];
@@ -259,23 +273,40 @@ export async function queryOtherLanguageList({
 
   const lowerCaseSearch = search.toLowerCase();
 
-  console.log("matchingRowsQuery");
-  const matchingRowsQuery = await sw.query(
-    `
+  let matchingRowsQuery;
+
+  if (!lowerCaseSearch) {
+    await sw.query(`
+      INSERT INTO rootList
+      SELECT *
+      FROM roots
+      ORDER BY ${appLanguage}LowerCase ASC;
+    `);
+
+    const rootListQuery = await sw.query(`
+      SELECT *
+      FROM rootList
+      LIMIT ${offset}, ${limit}
+    `);
+
+    roots = rootListQuery?.data;
+  } else {
+    matchingRowsQuery = await sw.query(
+      `
       SELECT *
       FROM roots
       WHERE ${appLanguage}LowerCase = ?
       OR ${appLanguage}LowerCase LIKE ?
       OR ${appLanguage}LowerCase LIKE ?
       ORDER BY ${appLanguage}LowerCase ASC
-      LIMIT 1
+      LIMIT 1;
     `,
-    [lowerCaseSearch, `${lowerCaseSearch}%`, `% ${lowerCaseSearch}%`]
-  );
+      [lowerCaseSearch, `${lowerCaseSearch}%`, `% ${lowerCaseSearch}%`]
+    );
+  }
 
-  if (!isEmpty(matchingRowsQuery.data)) {
+  if (!isEmpty(matchingRowsQuery?.data)) {
     const firstMatchingRowId = matchingRowsQuery.data[0]?.id;
-    console.log("matchingRowIndexQuery");
     const matchingRowIndexQuery = await sw.query(
       `
       SELECT *, t.rowIndex
@@ -290,7 +321,6 @@ export async function queryOtherLanguageList({
     );
     const sliceStartFrom: number = matchingRowIndexQuery.data[0]?.rowIndex - 1;
 
-    console.log("copy to temp sliced table");
     // copy to temp sliced table
     await sw.query(`
         INSERT INTO tempRootList
@@ -303,7 +333,6 @@ export async function queryOtherLanguageList({
 
     const asyncQueries: AsyncQueryFunction[] = [];
 
-    console.log("forEach asyncQueries");
     forEach(Array(lowerCaseSearch.length), async (_, index, collection) => {
       asyncQueries.push(async () => {
         const searchString = lowerCaseSearch.slice(
@@ -327,8 +356,6 @@ export async function queryOtherLanguageList({
       });
     });
 
-    console.log("queryAll(asyncQueries)");
-
     await queryAll(asyncQueries);
 
     const rootListQuery = await sw.query(`
@@ -337,7 +364,6 @@ export async function queryOtherLanguageList({
       LIMIT ${offset}, ${limit}
     `);
 
-    console.log("queryAll(asyncQueries)");
     roots = rootListQuery?.data;
   }
 
@@ -346,10 +372,68 @@ export async function queryOtherLanguageList({
   const times = await queryTimes();
   const timeRColumnLinks = map(times, "r");
 
-  console.log("Promise.all");
-
   const mixedRootsStringsArray = await Promise.all(
     map(roots, async (wordRoot: IWordRoot) => {
+      const { data } = await sw
+        .table(ETable.strings)
+        .where("root", `${wordRoot.root}`, "=", "AND")
+        .where("links", `${wordRoot.links}`, "=")
+        .select(null);
+
+      const strings = map(data, (str) => {
+        const isVerb = str.r && timeRColumnLinks.includes(str.r);
+
+        return {
+          ...str,
+          time: isVerb && find(times, { r: str.r }),
+        };
+      });
+
+      return {
+        ...wordRoot,
+        strings,
+      };
+    })
+  );
+
+  const flatArray: IWordRoot[] = reduce(
+    mixedRootsStringsArray,
+    (result, item) => {
+      const innerArray = map(item.strings, (string: IString) => ({
+        ...item,
+        string,
+        id: `${item.id}_${string.id}`,
+      }));
+
+      // @ts-expect-error
+      return concat(result, innerArray);
+    },
+    [] as IWordRoot[]
+  );
+
+  return flatArray;
+}
+
+export async function queryOtherLanguageNextPage({
+  limit,
+  offset,
+}: {
+  limit: number;
+  offset: number;
+}) {
+  // @ts-expect-error
+  const sw = new SQLiteWrapper(database);
+  const { data } = await sw.query(`
+    SELECT *
+    FROM rootList
+    LIMIT ${offset}, ${limit}
+  `);
+
+  const times = await queryTimes();
+  const timeRColumnLinks = map(times, "r");
+
+  const mixedRootsStringsArray = await Promise.all(
+    map(data, async (wordRoot: IWordRoot) => {
       const { data } = await sw
         .table(ETable.strings)
         .where("root", `${wordRoot.root}`, "=", "AND")
