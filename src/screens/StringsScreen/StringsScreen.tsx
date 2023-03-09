@@ -19,7 +19,7 @@ export default function StringsScreen({
         {list.length === 0 && search && !isLoading && (
           <Text style={styles.text}>Ничего не найдено</Text>
         )}
-        {error && <Text style={styles.text}>{error}</Text>}
+        {/* {error && <Text style={styles.text}>{error}</Text>} */}
         <StringList />
       </View>
     </View>

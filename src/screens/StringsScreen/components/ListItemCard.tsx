@@ -63,6 +63,7 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingBottom: 5,
     paddingTop: 3,
+    fontWeight: "500",
     fontSize: 16,
     textAlign: "center",
     justifyContent: "center",

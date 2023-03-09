@@ -8,7 +8,7 @@ import { IString, IWordRoot } from "../../../types";
 import { getIsHebrewText } from "../../../common/helpers";
 import { HebrewListItem } from "./HebrewListItem";
 import { ListItem } from "./ListIttem";
-import { StyleSheet, Text } from "react-native";
+import { Text } from "react-native";
 import { Fragment } from "react";
 
 export default function StringList() {
@@ -43,7 +43,9 @@ export function HightLightedText({ search, text }: IProps) {
     const text = str.trim().toLowerCase();
 
     if (search && text === searchString) {
-      style = styles.redText;
+      style = {
+        color: "#F00",
+      };
     }
 
     return (
@@ -56,8 +58,3 @@ export function HightLightedText({ search, text }: IProps) {
 
   return <>{TextElements}</>;
 }
-const styles = StyleSheet.create({
-  redText: {
-    color: "red",
-  },
-});
