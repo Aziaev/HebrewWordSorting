@@ -3,19 +3,17 @@ import {
   useStringsDispatchedActions,
   useStringsStateSelector,
 } from "../../../store/slices/strings/strings.hooks";
-import { INPUT_PLACEHOLDER } from "../../../common/constants";
+import { ELanguage, INPUT_PLACEHOLDER } from "../../../common/constants";
 import * as React from "react";
 import { useEffect, useMemo } from "react";
 import Colors from "../../../common/constants/Colors";
 import { getIsHebrewText } from "../../../common/helpers";
 import { debounce } from "lodash";
 import { FontAwesome } from "@expo/vector-icons";
-import { useAppSelector } from "../../../store/slices/app/app.hooks";
 
 export default function SearchInput() {
   const { search } = useStringsStateSelector();
   const { setSearch, searchByString } = useStringsDispatchedActions();
-  const { appLanguage } = useAppSelector();
 
   const debouncedSearchByString = useMemo(
     () => debounce(searchByString, 400),
@@ -34,7 +32,7 @@ export default function SearchInput() {
         style={getStyles(search).textInput}
         value={search}
         onChangeText={setSearch}
-        placeholder={INPUT_PLACEHOLDER[appLanguage]}
+        placeholder={INPUT_PLACEHOLDER[ELanguage.en]}
         placeholderTextColor={Colors.grey5}
       />
       {search && (
