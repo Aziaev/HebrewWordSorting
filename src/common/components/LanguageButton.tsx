@@ -5,15 +5,16 @@ import * as React from "react";
 import Colors from "../constants/Colors";
 
 enum Size {
-  small,
-  big,
+  S,
+  M,
+  L,
 }
 
 export function LanguageButton({
   setLanguage,
   language,
   buttonLanguage,
-  size = Size.small,
+  size = Size.S,
 }: {
   setLanguage: (lang: ELanguage.ru | ELanguage.ua | ELanguage.en) => void;
   language: ELanguage.ru | ELanguage.ua | ELanguage.en;
@@ -47,21 +48,28 @@ export function LanguageButton({
   );
 }
 
+const sizeMap = {
+  [Size.S]: { borderRadius: 8, fontSize: 18, width: 40 },
+  [Size.M]: { borderRadius: 10, fontSize: 24, width: 50 },
+  [Size.L]: { borderRadius: 15, fontSize: 40, width: 80 },
+};
+
 const getStyle = (selected: boolean, size: Size) =>
   StyleSheet.create({
     // eslint-disable-next-line react-native/no-unused-styles
     button: {
-      width: size === Size.small ? 50 : 80,
+      width: sizeMap[size].width,
       display: "flex",
       justifyContent: "center",
       alignItems: "center",
       textAlign: "center",
       borderColor: Colors.grey3,
       borderWidth: selected ? 2 : 0,
-      borderRadius: size === Size.small ? 10 : 15,
+      borderRadius: sizeMap[size].borderRadius,
     },
+    // eslint-disable-next-line react-native/no-unused-styles
     flag: {
-      fontSize: size === Size.small ? 24 : 40,
+      fontSize: sizeMap[size].fontSize,
     },
   });
 

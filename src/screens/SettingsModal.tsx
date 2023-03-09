@@ -23,24 +23,24 @@ export default function SettingsModal() {
       <StatusBar style={Platform.OS === "ios" ? "light" : "auto"} />
       <View style={styles.body}>
         <Text style={styles.title}>{SELECT_APP_LANGUAGE[appLanguage]}</Text>
-        <View style={styles.buttons}>
+        <View style={styles.buttonsWheKeyboardOpen}>
           <LanguageButton
             setLanguage={setAppLanguage}
             language={appLanguage}
             buttonLanguage={ELanguage.ru}
-            size={LanguageButton.size.big}
+            size={LanguageButton.size.L}
           />
           <LanguageButton
             setLanguage={setAppLanguage}
             language={appLanguage}
             buttonLanguage={ELanguage.ua}
-            size={LanguageButton.size.big}
+            size={LanguageButton.size.L}
           />
           <LanguageButton
             setLanguage={setAppLanguage}
             language={appLanguage}
             buttonLanguage={ELanguage.en}
-            size={LanguageButton.size.big}
+            size={LanguageButton.size.L}
           />
         </View>
         <Text style={styles.muted}>{SELECTED_APP_LANGUAGE[appLanguage]}</Text>
@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "flex-start",
   },
-  buttons: {
+  buttonsWheKeyboardOpen: {
     width: "100%",
     display: "flex",
     flexDirection: "row",

@@ -1,12 +1,10 @@
 import { ActivityIndicator, StyleSheet } from "react-native";
 import { Text, View } from "../common/components/Themed";
-import { RootTabScreenProps } from "../types/types";
 import { useDatabaseStateSelector } from "../store/slices/dataBase/database.hooks";
 
-export default function DBLoadingScreen({
-  navigation,
-}: RootTabScreenProps<"DBLoadingScreen">) {
+export default function DBLoadingScreen() {
   const { status } = useDatabaseStateSelector();
+
   return (
     <View style={styles.container}>
       <ActivityIndicator size="large" color="black" />
