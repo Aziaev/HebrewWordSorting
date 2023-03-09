@@ -1,6 +1,6 @@
 import SQLiteWrapper from "../../../common/SQLWrapper";
 import { database } from "../../../index";
-import { concat, find, forEach, isEmpty, map, reduce } from "lodash";
+import { concat, filter, find, forEach, isEmpty, map, reduce } from "lodash";
 import { IString, IWordRoot } from "../../../types";
 import { ETable } from "./strings.thunks";
 import { getIsHebrewText } from "../../../common/helpers";
@@ -411,6 +411,40 @@ export async function queryOtherLanguageList({
           const fullMatchRowIds = map(fullMatchData, ({ id }) => id);
           sw.table("tempRootList").whereIn("id", fullMatchRowIds).delete();
 
+          // match as one of word in list as first
+          const { data: firstInListData } = await sw.query(
+            `
+            SELECT *
+            FROM tempRootList
+            WHERE ${language}LowerCase LIKE ?
+            ORDER BY ${language}LowerCase ASC;
+          `,
+            [`${searchString},%`]
+          );
+          const firstInListRowIds = map(firstInListData, ({ id }) => id);
+          sw.table("tempRootList").whereIn("id", firstInListRowIds).delete();
+
+          // match as one of word in list
+          const { data: oneOfListData } = await sw.query(
+            `
+            SELECT *
+            FROM tempRootList
+            WHERE ${language}LowerCase LIKE ?
+            OR ${language}LowerCase LIKE ?
+            OR ${language}LowerCase LIKE ?
+            OR ${language}LowerCase LIKE ?
+            ORDER BY ${language}LowerCase ASC;
+          `,
+            [
+              `%, ${searchString},%`,
+              `%,${searchString},%`,
+              `%, ${searchString}`,
+              `%,${searchString}`,
+            ]
+          );
+          const oneOfListRowIds = map(oneOfListData, ({ id }) => id);
+          sw.table("tempRootList").whereIn("id", oneOfListRowIds).delete();
+
           const { data: likeMatchData } = await sw.query(
             `
             SELECT *
@@ -442,6 +476,8 @@ export async function queryOtherLanguageList({
 
           await sw.insert("rootList", [
             ...fullMatchData,
+            ...firstInListData,
+            ...oneOfListData,
             ...likeMatchData,
             ...inSentenceMatchData,
           ]);
@@ -477,9 +513,6 @@ export async function queryOtherLanguageList({
 
   await sw.query(`DROP TABLE tempRootList`);
 
-  const times = await queryTimes();
-  const timeRColumnLinks = map(times, "r");
-
   const mixedRootsStringsArray = await Promise.all(
     map(roots, async (wordRoot: IWordRoot) => {
       const { data } = await sw
@@ -488,13 +521,8 @@ export async function queryOtherLanguageList({
         .where("links", `${wordRoot.links}`, "=")
         .select(null);
 
-      const strings = map(data, (str) => {
-        const isVerb = str.r && timeRColumnLinks.includes(str.r);
-
-        return {
-          ...str,
-          time: isVerb && find(times, { r: str.r }),
-        };
+      const strings = filter(data, (str) => {
+        return !str.r || str.r === "a";
       });
 
       return {
@@ -537,9 +565,6 @@ export async function queryOtherLanguageNextPage({
     LIMIT ${offset}, ${limit}
   `);
 
-  const times = await queryTimes();
-  const timeRColumnLinks = map(times, "r");
-
   const mixedRootsStringsArray = await Promise.all(
     map(data, async (wordRoot: IWordRoot) => {
       const { data } = await sw
@@ -548,13 +573,8 @@ export async function queryOtherLanguageNextPage({
         .where("links", `${wordRoot.links}`, "=")
         .select(null);
 
-      const strings = map(data, (str) => {
-        const isVerb = str.r && timeRColumnLinks.includes(str.r);
-
-        return {
-          ...str,
-          time: isVerb && find(times, { r: str.r }),
-        };
+      const strings = filter(data, (str) => {
+        return !str.r || str.r === "a";
       });
 
       return {
