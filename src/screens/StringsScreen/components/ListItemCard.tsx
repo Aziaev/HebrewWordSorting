@@ -1,5 +1,4 @@
-import { StyleSheet, View, Text } from "react-native";
-import { ReactNode } from "react";
+import { StyleSheet, Text, View } from "react-native";
 import Colors from "../../../common/constants/Colors";
 import { HightLightedText } from "./StringList";
 
@@ -18,7 +17,7 @@ export function ListItemCard({
 }: IListItemCardProps) {
   return (
     <View style={styles.card}>
-      <Text style={styles.translations} adjustsFontSizeToFit numberOfLines={2}>
+      <Text style={styles.translations} adjustsFontSizeToFit numberOfLines={3}>
         <HightLightedText text={translation} search={search} />
       </Text>
       <View style={styles.hebrewWords}>
