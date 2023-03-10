@@ -2,14 +2,6 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { RootState } from "../../";
 import { queryCount, queryList, queryNextPage } from "./strings.helpers";
 
-export enum ETable {
-  strings = "strings",
-  roots = "roots",
-  times = "times",
-  verbs = "verbs",
-  nikud = "nikud",
-}
-
 export const searchByString = createAsyncThunk(
   "strings/searchByString",
   async (_, { getState }) => {

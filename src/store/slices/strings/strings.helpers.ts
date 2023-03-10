@@ -2,9 +2,8 @@ import SQLiteWrapper from "../../../common/SQLWrapper";
 import { database } from "../../../index";
 import { concat, filter, find, forEach, isEmpty, map, reduce } from "lodash";
 import { IString, IWordRoot } from "../../../types";
-import { ETable } from "./strings.thunks";
 import { getIsHebrewText } from "../../../common/helpers";
-import { ELanguage } from "../../../common/constants";
+import { ELanguage, ETable } from "../../../common/constants";
 
 export async function queryList({
   search,
@@ -613,7 +612,7 @@ export async function queryCount() {
   return transaction.data[0]["count(*)"];
 }
 
-async function queryTimes() {
+export async function queryTimes() {
   // @ts-expect-error
   const sw = new SQLiteWrapper(database);
   const { data } = await sw.table(ETable.times).select(null);

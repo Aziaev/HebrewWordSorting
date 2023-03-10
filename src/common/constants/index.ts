@@ -39,3 +39,15 @@ export const SELECTED_APP_LANGUAGE = {
   [ELanguage.ua]: "Вибрана мова: Український",
   [ELanguage.en]: "Selected language: English",
 };
+
+export enum ETable {
+  strings = "strings",
+  roots = "roots",
+  times = "times",
+  verbs = "verbs",
+  nikud = "nikud",
+  stringList = "stringList",
+  rootList = "rootList",
+  tempStringList = "tempStringList",
+  tempRootsList = "tempRootsList",
+}

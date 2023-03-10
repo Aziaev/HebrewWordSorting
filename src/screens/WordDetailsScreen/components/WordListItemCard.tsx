@@ -1,24 +1,30 @@
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Colors from "../../../common/constants/Colors";
-import { HightLightedText, HightLightHebrewText } from "./HighLights";
+import { IString } from "../../../types";
+import { map } from "lodash";
+import { useStringsStateSelector } from "../../../store/slices/strings/strings.hooks";
 
-interface IListItemCardProps {
-  translation: string;
-  word: string;
-  words?: string;
-  prefix?: string;
-  search: string;
+interface IWordListItemCardProps {
+  str: IString;
   onPress?: () => void;
+  selected: boolean;
 }
 
-export function ListItemCard({
-  translation,
-  word,
-  words = "",
-  prefix,
-  search,
+export function WordListItemCard({
+  str,
   onPress,
-}: IListItemCardProps) {
+  selected,
+}: IWordListItemCardProps) {
+  const { language } = useStringsStateSelector();
+  const translation = map(
+    str.translations,
+    (translation) => translation[language]
+  ).join(", ");
+  const prefix =
+    str?.time?.time &&
+    str?.time?.pronouns &&
+    `${str?.time?.time} ${str?.time?.pronouns}`;
+
   return (
     <TouchableOpacity onPress={onPress}>
       <View style={styles.card}>
@@ -27,21 +33,21 @@ export function ListItemCard({
           adjustsFontSizeToFit
           numberOfLines={3}
         >
-          <HightLightedText text={translation} search={search} />
+          {translation}
         </Text>
         <View style={styles.hebrewWords}>
           {prefix ? (
             <View style={styles.row}>
               <Text
-                style={[styles.hebrewText, styles.word]}
+                style={[
+                  styles.hebrewText,
+                  styles.word,
+                  { color: selected ? "red" : "black" },
+                ]}
                 adjustsFontSizeToFit
                 numberOfLines={1}
               >
-                <HightLightHebrewText
-                  search={search}
-                  compareText={word}
-                  displayText={words}
-                />
+                {str.words}
               </Text>
               <Text
                 style={[styles.hebrewText, styles.auxWords]}
@@ -52,12 +58,13 @@ export function ListItemCard({
               </Text>
             </View>
           ) : (
-            <Text style={[styles.hebrewText, { textAlign: "center" }]}>
-              <HightLightHebrewText
-                search={search}
-                compareText={word}
-                displayText={words}
-              />
+            <Text
+              style={[
+                styles.hebrewText,
+                { textAlign: "center", color: selected ? "red" : "black" },
+              ]}
+            >
+              {str.words}
             </Text>
           )}
         </View>
@@ -74,6 +81,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginLeft: 20,
     marginRight: 20,
+    width: "100%",
   },
   translations: {
     minHeight: 32,
@@ -81,7 +89,6 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingBottom: 5,
     paddingTop: 3,
-    paddingHorizontal: 5,
     fontWeight: "500",
     fontSize: 16,
     textAlign: "center",

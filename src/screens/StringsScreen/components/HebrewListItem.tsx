@@ -3,8 +3,8 @@ import { IString } from "../../../types";
 import { ELanguage } from "../../../common/constants";
 import { map } from "lodash";
 import { ListItemCard } from "./ListItemCard";
-import VerbTablesScreen from "../../VerbTablesScreen/VerbTablesScreen";
-import NonVerbScreen from "../../NonVerbScreen/NonVerbScreen";
+import WordDetails from "../../WordDetailsScreen/WordDetails";
+import { IStringsState } from "../../../store/slices/wordDetails/wordDetails";
 
 interface IHebrewListItemProps extends ListRenderItemInfo<IString> {
   item: IString;
@@ -12,27 +12,29 @@ interface IHebrewListItemProps extends ListRenderItemInfo<IString> {
     language: ELanguage.ua | ELanguage.ru | ELanguage.en;
     search: string;
     navigate: (path: string) => void;
+    setSearchProps: (
+      payload: Pick<IStringsState, "clickedItem" | "search" | "language">
+    ) => void;
   };
 }
 
 export function HebrewListItem({
   item,
-  extraData: { language, search, navigate },
+  extraData: { language, search, navigate, setSearchProps },
 }: IHebrewListItemProps) {
   const translation = map(
     item.translations,
     (translation) => translation[language]
   ).join(", ");
-
   const prefix =
     item?.time?.time &&
     item?.time?.pronouns &&
     `${item?.time?.time} ${item?.time?.pronouns}`;
 
   function handlePressItem() {
-    console.log("handleClickItem", item);
-    const isVerb = item?.r;
-    navigate(isVerb ? VerbTablesScreen.path : NonVerbScreen.path);
+    setSearchProps({ clickedItem: item, search, language });
+
+    navigate(WordDetails.path);
   }
 
   return (

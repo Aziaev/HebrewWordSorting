@@ -5,7 +5,7 @@ import StringsScreen from "../screens/StringsScreen/StringsScreen";
 import { useDatabaseStateSelector } from "../store/slices/dataBase/database.hooks";
 import DBLoadingScreen from "../screens/DBLoadingScreen";
 import { APP_TITLE, ELanguage } from "../common/constants";
-import VerbTablesScreen from "../screens/VerbTablesScreen/VerbTablesScreen";
+import WordDetails from "../screens/WordDetailsScreen/WordDetails";
 import NonVerbScreen from "../screens/NonVerbScreen/NonVerbScreen";
 
 const Stack = createNativeStackNavigator();
@@ -34,8 +34,8 @@ export default function Navigation() {
               }}
             />
             <Stack.Screen
-              name={VerbTablesScreen.path}
-              component={VerbTablesScreen}
+              name={WordDetails.path}
+              component={WordDetails}
               options={{
                 title: APP_TITLE[ELanguage.en],
                 headerBackTitleVisible: false,
