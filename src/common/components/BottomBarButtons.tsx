@@ -1,4 +1,10 @@
-import { Keyboard, Platform, StyleSheet, View } from "react-native";
+import {
+  Keyboard,
+  NativeModules,
+  Platform,
+  StyleSheet,
+  View,
+} from "react-native";
 import * as React from "react";
 import { ELanguage } from "../constants";
 import {
@@ -15,19 +21,19 @@ export default function BottomBarButtons() {
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
 
   useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener(
+    const keyboardWillShowListener = Keyboard.addListener(
       "keyboardWillShow",
       () => setIsKeyboardOpen(true)
     );
 
-    const keyboardDidHideListener = Keyboard.addListener(
+    const keyboardWillHideListener = Keyboard.addListener(
       "keyboardWillHide",
       () => setIsKeyboardOpen(false)
     );
 
     return () => {
-      keyboardDidShowListener.remove();
-      keyboardDidHideListener.remove();
+      keyboardWillShowListener.remove();
+      keyboardWillHideListener.remove();
     };
   }, []);
 

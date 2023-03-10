@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Colors from "../../../common/constants/Colors";
 import { HightLightedText, HightLightHebrewText } from "./HighLights";
 
@@ -8,6 +8,7 @@ interface IListItemCardProps {
   words?: string;
   prefix?: string;
   search: string;
+  onPress?: () => void;
 }
 
 export function ListItemCard({
@@ -16,45 +17,52 @@ export function ListItemCard({
   words = "",
   prefix,
   search,
+  onPress,
 }: IListItemCardProps) {
   return (
-    <View style={styles.card}>
-      <Text style={styles.translations} adjustsFontSizeToFit numberOfLines={3}>
-        <HightLightedText text={translation} search={search} />
-      </Text>
-      <View style={styles.hebrewWords}>
-        {prefix ? (
-          <View style={styles.row}>
-            <Text
-              style={[styles.hebrewText, styles.word]}
-              adjustsFontSizeToFit
-              numberOfLines={1}
-            >
+    <TouchableOpacity onPress={onPress}>
+      <View style={styles.card}>
+        <Text
+          style={styles.translations}
+          adjustsFontSizeToFit
+          numberOfLines={3}
+        >
+          <HightLightedText text={translation} search={search} />
+        </Text>
+        <View style={styles.hebrewWords}>
+          {prefix ? (
+            <View style={styles.row}>
+              <Text
+                style={[styles.hebrewText, styles.word]}
+                adjustsFontSizeToFit
+                numberOfLines={1}
+              >
+                <HightLightHebrewText
+                  search={search}
+                  compareText={word}
+                  displayText={words}
+                />
+              </Text>
+              <Text
+                style={[styles.hebrewText, styles.auxWords]}
+                adjustsFontSizeToFit
+                numberOfLines={1}
+              >
+                {prefix}
+              </Text>
+            </View>
+          ) : (
+            <Text style={[styles.hebrewText, { textAlign: "center" }]}>
               <HightLightHebrewText
                 search={search}
                 compareText={word}
                 displayText={words}
               />
             </Text>
-            <Text
-              style={[styles.hebrewText, styles.auxWords]}
-              adjustsFontSizeToFit
-              numberOfLines={1}
-            >
-              {prefix}
-            </Text>
-          </View>
-        ) : (
-          <Text style={[styles.hebrewText, { textAlign: "center" }]}>
-            <HightLightHebrewText
-              search={search}
-              compareText={word}
-              displayText={words}
-            />
-          </Text>
-        )}
+          )}
+        </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 

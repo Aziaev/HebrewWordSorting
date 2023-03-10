@@ -1,10 +1,10 @@
-import { Dimensions, StyleSheet } from "react-native";
-import { View } from "../../common/components/Themed";
+import { Dimensions, StyleSheet, Text, View } from "react-native";
+import Colors from "../../common/constants/Colors";
 
 export default function VerbTablesScreen({ navigation }) {
   return (
     <View style={styles.container}>
-      <text>fdsfsdfa</text>
+      <Text>VerbTablesScreen</Text>
     </View>
   );
 }
@@ -13,7 +13,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
-    justifyContent: "flex-start",
+    justifyContent: "center",
+    backgroundColor: Colors.background,
   },
   text: {
     textAlign: "center",
@@ -29,3 +30,5 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
 });
+
+VerbTablesScreen.path = "VerbTablesScreen";
