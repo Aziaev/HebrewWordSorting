@@ -7,7 +7,7 @@ import {
 } from "../../../store/slices/wordDetails/wordDetails.hooks";
 import { useEffect, useMemo } from "react";
 
-export function BinyanButtons() {
+export function VerbConjugationTables() {
   const { selected, binyans, selectedBinyan } =
     useWordDetailsScreenStateSelector();
   const { setSelectedBinyan } = useWordDetailsScreenDispatchedActions();
@@ -34,7 +34,22 @@ export function BinyanButtons() {
       <Text style={styles.translations} adjustsFontSizeToFit numberOfLines={3}>
         Verb conjugation tables
       </Text>
-      <Text style={styles.hebrewText}>{selected?.root}</Text>
+      <View style={styles.row}>
+        <Text
+          style={[styles.hebrewText, styles.word]}
+          adjustsFontSizeToFit
+          numberOfLines={1}
+        >
+          {selected?.root}
+        </Text>
+        <Text
+          style={[styles.hebrewText, styles.auxWords]}
+          adjustsFontSizeToFit
+          numberOfLines={1}
+        >
+          שוֹרֶש
+        </Text>
+      </View>
       {binyans &&
         map(sortedBinyanKeys, (binyan, index) => {
           /* @ts-expect-error */
@@ -90,8 +105,6 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingTop: 3,
     paddingBottom: 3,
-    paddingLeft: 20,
-    paddingRight: 20,
     fontSize: 32,
     fontFamily: "David",
   },
@@ -109,5 +122,23 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
     borderLeftWidth: 2,
     borderRightWidth: 2,
+  },
+  row: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  word: {
+    textAlign: "right",
+    flex: 1,
+    color: "black",
+    padding: 0,
+  },
+  auxWords: {
+    textAlign: "left",
+    flex: 1,
+    color: "brown",
+    fontSize: 24,
   },
 });

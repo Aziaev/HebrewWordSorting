@@ -10,9 +10,10 @@ import { EStatus } from "../../types";
 import SearchInput from "./components/SearchInput";
 import StringList from "./components/StringList";
 import BottomBarButtons from "../../common/components/BottomBarButtons";
+import { NOTHING_FOUND } from "../../common/constants";
 
 export default function StringsScreen() {
-  const { search, list, status } = useStringsStateSelector();
+  const { search, list, status, language } = useStringsStateSelector();
   const isLoading = status === EStatus.loading;
 
   return (
@@ -25,12 +26,12 @@ export default function StringsScreen() {
         <SearchInput />
         <View style={styles.searchResult}>
           {list.length === 0 && search && !isLoading && (
-            <Text style={styles.text}>Ничего не найдено</Text>
+            <Text style={styles.text}>
+              {language && NOTHING_FOUND[language]}
+            </Text>
           )}
-          {/* {error && <Text style={styles.text}>{error}</Text>} */}
           <StringList />
         </View>
-
         <BottomBarButtons />
       </View>
     </KeyboardAvoidingView>

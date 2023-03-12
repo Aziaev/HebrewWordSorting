@@ -15,8 +15,6 @@ export function VerbInfinitive() {
 
   const { language } = useStringsStateSelector();
 
-  console.log({ infinitiveTranslation });
-
   useEffect(() => {
     if (selectedBinyan && selected) {
       void fetchVerbInfinitive(selected, selectedBinyan);

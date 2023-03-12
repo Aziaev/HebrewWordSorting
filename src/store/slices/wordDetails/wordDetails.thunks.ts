@@ -77,8 +77,6 @@ export const fetchInfinitiveTranslation = createAsyncThunk(
   async ({ root, binyan }: { root: string; binyan: string }) => {
     const data = await queryInfinitiveTranslations({ root, binyan });
 
-    console.log("translation", data);
-
     return data[0];
   }
 );

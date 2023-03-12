@@ -105,8 +105,6 @@ export async function queryInfinitiveTranslations({
     .where("binyan", `${binyan}`, "=")
     .select(null);
 
-  console.log("queryInfinitiveTranslations", query);
-
   return query.data;
 }
 

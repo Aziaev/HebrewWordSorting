@@ -5,7 +5,7 @@ import {
   useWordDetailsScreenStateSelector,
 } from "../../store/slices/wordDetails/wordDetails.hooks";
 import WordList from "./components/WordList";
-import { BinyanButtons } from "./components/BinyanButtons";
+import { VerbConjugationTables } from "./components/VerbConjugationTables";
 import { VerbInfinitive } from "./components/VerbInfinitive";
 import { Verbs } from "./components/Verbs";
 import BottomBarButtons from "../../common/components/BottomBarButtons";
@@ -36,7 +36,7 @@ export default function WordDetails() {
     <View style={styles.container}>
       <ScrollView style={styles.scroollView}>
         <WordList />
-        {isVerb && <BinyanButtons />}
+        {isVerb && <VerbConjugationTables />}
         {isVerb && selectedBinyan && <VerbInfinitive />}
         {isVerb && <Verbs />}
       </ScrollView>

@@ -34,6 +34,12 @@ export const SELECT_APP_LANGUAGE = {
   [ELanguage.en]: "Select app language",
 };
 
+export const NOTHING_FOUND = {
+  [ELanguage.ru]: "Ничего не найдено",
+  [ELanguage.ua]: "Нічого не знайдено",
+  [ELanguage.en]: "Nothing found",
+};
+
 export const SELECTED_APP_LANGUAGE = {
   [ELanguage.ru]: "Выбран язык: Русский",
   [ELanguage.ua]: "Вибрана мова: Український",

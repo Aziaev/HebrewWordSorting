@@ -18,6 +18,8 @@ export function Verbs() {
     }
   }, [fetchVerbs, infinitive, selected, selectedBinyan]);
 
+  console.log(selected);
+
   return (
     <View style={styles.card}>
       {Array.isArray(verbs) &&
@@ -42,7 +44,11 @@ export function Verbs() {
               return (
                 <View style={styles.row} key={index}>
                   <Text
-                    style={[styles.hebrewText, styles.word]}
+                    style={[
+                      styles.hebrewText,
+                      styles.word,
+                      { color: selected?.words === word ? "red" : undefined },
+                    ]}
                     adjustsFontSizeToFit
                     numberOfLines={1}
                   >
