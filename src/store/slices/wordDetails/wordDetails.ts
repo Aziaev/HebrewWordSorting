@@ -1,10 +1,12 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { EStatus, IString, IVerb, IWordRoot } from "../../../types";
 import {
-  fetchInfinite,
+  fetchVerbInfinitive,
   fetchRoots,
   searchBinyans,
   searchMatchingWords,
+  fetchVerbs,
+  fetchInfinitiveTranslation,
 } from "./wordDetails.thunks";
 import { ELanguage } from "../../../common/constants";
 
@@ -19,9 +21,12 @@ export interface IStringsState {
   verbs: IVerb[];
   roots: IWordRoot[];
   binyans?: IVerb;
-  selectedBinyan?: string;
-  infinite?: IWordRoot;
+  selectedBinyan?: TBinyan;
+  infinitive?: IVerb;
+  infinitiveTranslation?: IWordRoot;
 }
+
+export type TBinyan = "g" | "f" | "e" | "d" | "c" | "b" | "a";
 
 const initialState: IStringsState = {
   status: EStatus.ready,
@@ -47,7 +52,7 @@ export const wordDetailsSlice = createSlice({
     setSelected(state, action: PayloadAction<IString>) {
       state.selected = action.payload;
     },
-    setSelectedBinyan(state, action: PayloadAction<string>) {
+    setSelectedBinyan(state, action: PayloadAction<TBinyan>) {
       state.selectedBinyan = action.payload;
     },
     reset: () => initialState,
@@ -113,19 +118,19 @@ export const wordDetailsSlice = createSlice({
       state.status = EStatus.error;
     });
 
-    builder.addCase(fetchInfinite.pending, (state) => {
+    builder.addCase(fetchVerbInfinitive.pending, (state) => {
       state.error = undefined;
       state.status = EStatus.loading;
     });
     builder.addCase(
-      fetchInfinite.fulfilled,
-      (state, action: PayloadAction<IWordRoot>) => {
+      fetchVerbInfinitive.fulfilled,
+      (state, action: PayloadAction<IVerb>) => {
         state.error = undefined;
         state.status = EStatus.ready;
-        state.infinite = action.payload;
+        state.infinitive = action.payload;
       }
     );
-    builder.addCase(fetchInfinite.rejected, (state, action: any) => {
+    builder.addCase(fetchVerbInfinitive.rejected, (state, action: any) => {
       if (action.payload) {
         state.error = action.payload.errorMessage;
       } else {
@@ -134,5 +139,52 @@ export const wordDetailsSlice = createSlice({
 
       state.status = EStatus.error;
     });
+
+    builder.addCase(fetchVerbs.pending, (state) => {
+      state.error = undefined;
+      state.status = EStatus.loading;
+    });
+    builder.addCase(
+      fetchVerbs.fulfilled,
+      (state, action: PayloadAction<IVerb[]>) => {
+        state.error = undefined;
+        state.status = EStatus.ready;
+        state.verbs = action.payload;
+      }
+    );
+    builder.addCase(fetchVerbs.rejected, (state, action: any) => {
+      if (action.payload) {
+        state.error = action.payload.errorMessage;
+      } else {
+        state.error = action.error.message;
+      }
+
+      state.status = EStatus.error;
+    });
+
+    builder.addCase(fetchInfinitiveTranslation.pending, (state) => {
+      state.error = undefined;
+      state.status = EStatus.loading;
+    });
+    builder.addCase(
+      fetchInfinitiveTranslation.fulfilled,
+      (state, action: PayloadAction<IWordRoot>) => {
+        state.error = undefined;
+        state.status = EStatus.ready;
+        state.infinitiveTranslation = action.payload;
+      }
+    );
+    builder.addCase(
+      fetchInfinitiveTranslation.rejected,
+      (state, action: any) => {
+        if (action.payload) {
+          state.error = action.payload.errorMessage;
+        } else {
+          state.error = action.error.message;
+        }
+
+        state.status = EStatus.error;
+      }
+    );
   },
 });

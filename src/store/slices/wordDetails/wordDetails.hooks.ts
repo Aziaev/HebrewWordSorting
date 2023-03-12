@@ -1,10 +1,12 @@
 import { useSelector } from "react-redux";
 import { useMemo } from "react";
 import { RootState, useAppDispatch } from "../../index";
-import { IStringsState, wordDetailsSlice } from "./wordDetails";
+import { IStringsState, TBinyan, wordDetailsSlice } from "./wordDetails";
 import {
-  fetchInfinite,
+  fetchInfinitiveTranslation,
   fetchRoots,
+  fetchVerbInfinitive,
+  fetchVerbs,
   searchBinyans,
   searchMatchingWords,
 } from "./wordDetails.thunks";
@@ -19,25 +21,32 @@ export function useWordDetailsScreenDispatchedActions() {
         void dispatch(searchMatchingWords());
       },
       searchBinyans: (str: IString) => {
-        console.log("searchBinyans");
         void dispatch(searchBinyans(str));
       },
       reset: () => dispatch(wordDetailsSlice.actions.reset()),
       setSelectedBinyan: (binyan: string) =>
-        dispatch(wordDetailsSlice.actions.setSelectedBinyan(binyan)),
+        dispatch(wordDetailsSlice.actions.setSelectedBinyan(binyan as TBinyan)),
       setSearchProps: (
         payload: Pick<IStringsState, "clickedItem" | "search" | "language">
       ) => dispatch(wordDetailsSlice.actions.setSearchProps(payload)),
       setSelected: (item: IString) =>
         dispatch(wordDetailsSlice.actions.setSelected(item)),
       fetchRoots: async (item: IString) => await dispatch(fetchRoots(item)),
-      fetchInfinite: async (str: IString, selectedBinyan: string) =>
+      fetchVerbInfinitive: async (str: IString, selectedBinyan: string) =>
         await dispatch(
-          fetchInfinite({
+          fetchVerbInfinitive({
             str,
             selectedBinyan,
           })
         ),
+      fetchInfinitiveTranslations: async ({
+        root,
+        binyan,
+      }: {
+        root: string;
+        binyan: string;
+      }) => await dispatch(fetchInfinitiveTranslation({ root, binyan })),
+      fetchVerbs: async (root: string) => await dispatch(fetchVerbs(root)),
     }),
     [dispatch]
   );

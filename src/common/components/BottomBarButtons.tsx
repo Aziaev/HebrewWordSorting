@@ -1,11 +1,6 @@
-import {
-  Keyboard,
-  NativeModules,
-  Platform,
-  StyleSheet,
-  View,
-} from "react-native";
+import { Keyboard, Platform, StyleSheet, View } from "react-native";
 import * as React from "react";
+import { useEffect, useState } from "react";
 import { ELanguage } from "../constants";
 import {
   useStringsDispatchedActions,
@@ -13,7 +8,6 @@ import {
 } from "../../store/slices/strings/strings.hooks";
 import { LanguageButton } from "./LanguageButton";
 import Colors from "../constants/Colors";
-import { useEffect, useState } from "react";
 
 export default function BottomBarButtons() {
   const { language } = useStringsStateSelector();

@@ -7,36 +7,68 @@ import {
 } from "../../../store/slices/wordDetails/wordDetails.hooks";
 import { useEffect, useMemo } from "react";
 
-export function Infinite() {
+export function BinyanButtons() {
   const { selected, binyans, selectedBinyan } =
     useWordDetailsScreenStateSelector();
-  const { fetchInfinite } = useWordDetailsScreenDispatchedActions();
+  const { setSelectedBinyan } = useWordDetailsScreenDispatchedActions();
+
+  const sortedBinyanKeys = useMemo(
+    () =>
+      (binyans &&
+        filter(
+          Object.keys(binyans).sort(),
+          (str) => !["base", "face", "id", "r"].includes(str)
+        )) ||
+      [],
+    [binyans]
+  );
 
   useEffect(() => {
-    if (selectedBinyan && selected) {
-      void fetchInfinite(selected, selectedBinyan);
+    if (!isEmpty(sortedBinyanKeys)) {
+      setSelectedBinyan(sortedBinyanKeys[0]);
     }
-  }, [fetchInfinite, selected, selectedBinyan]);
-
-  console.log("selected", selectedBinyan);
+  }, [setSelectedBinyan, sortedBinyanKeys]);
 
   return (
     <View style={styles.card}>
       <Text style={styles.translations} adjustsFontSizeToFit numberOfLines={3}>
         Verb conjugation tables
       </Text>
-      <Text style={styles.hebrewText}>infinite</Text>
+      <Text style={styles.hebrewText}>{selected?.root}</Text>
+      {binyans &&
+        map(sortedBinyanKeys, (binyan, index) => {
+          /* @ts-expect-error */
+          return binyans[binyan] ? (
+            <TouchableOpacity
+              key={index}
+              onPress={() => {
+                console.log("binyan", binyan);
+                setSelectedBinyan(binyan);
+              }}
+              style={{
+                ...styles.pressable,
+                ...(selectedBinyan === binyan ? styles.selected : {}),
+              }}
+            >
+              <Text style={styles.hebrewText}>
+                {/* @ts-expect-error */}
+                {binyans[binyan]}
+              </Text>
+            </TouchableOpacity>
+          ) : null;
+        })}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    paddingTop: 3,
-    marginBottom: 3,
+    marginTop: 8,
     borderColor: Colors.grey2,
     borderWidth: 1,
     borderRadius: 5,
+    borderBottomRightRadius: 0,
+    borderBottomLeftRadius: 0,
     textAlign: "center",
     width: "100%",
   },

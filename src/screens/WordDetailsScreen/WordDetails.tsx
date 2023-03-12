@@ -1,17 +1,14 @@
-import {
-  Dimensions,
-  KeyboardAvoidingView,
-  Platform,
-  StyleSheet,
-  View,
-} from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { useEffect } from "react";
 import {
   useWordDetailsScreenDispatchedActions,
   useWordDetailsScreenStateSelector,
 } from "../../store/slices/wordDetails/wordDetails.hooks";
 import WordList from "./components/WordList";
-import { VerbConjugationTables } from "./components/VerbConjugationTables";
+import { BinyanButtons } from "./components/BinyanButtons";
+import { VerbInfinitive } from "./components/VerbInfinitive";
+import { Verbs } from "./components/Verbs";
+import BottomBarButtons from "../../common/components/BottomBarButtons";
 
 export default function WordDetails() {
   const { searchMatchingWords, reset, searchBinyans } =
@@ -36,32 +33,27 @@ export default function WordDetails() {
   }, [searchMatchingWords, reset]);
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.keyboardAvoidingView}
-      keyboardVerticalOffset={40}
-    >
-      <View style={styles.container}>
+    <View style={styles.container}>
+      <ScrollView style={styles.scroollView}>
         <WordList />
-        {isVerb && <VerbConjugationTables />}
-        {selectedBinyan && <VerbConjugationTables />}
-      </View>
-    </KeyboardAvoidingView>
+        {isVerb && <BinyanButtons />}
+        {isVerb && selectedBinyan && <VerbInfinitive />}
+        {isVerb && <Verbs />}
+      </ScrollView>
+      <BottomBarButtons />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  keyboardAvoidingView: {
-    flex: 1,
-  },
   container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "flex-start",
-    width: Dimensions.get("screen").width,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
     backgroundColor: "white",
+  },
+  scroollView: {
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingVertical: 5,
   },
 });
 

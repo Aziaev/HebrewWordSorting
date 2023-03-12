@@ -40,23 +40,6 @@ export async function queryMatchingHebrewWords(search: string) {
   );
 }
 
-export async function queryVerbs(selected: IString) {
-  // @ts-expect-error
-  const sw = new SQLiteWrapper(database);
-
-  const { data } = await sw.query(
-    `
-            SELECT *
-            FROM ${ETable.verbs}
-            WHERE base = ?
-            ORDER BY r ASC;
-          `,
-    [selected.root]
-  );
-
-  return data;
-}
-
 export async function queryBinyans(selected: IString) {
   // @ts-expect-error
   const sw = new SQLiteWrapper(database);
@@ -66,10 +49,10 @@ export async function queryBinyans(selected: IString) {
             SELECT *
             FROM ${ETable.verbs}
             WHERE base = ?
-            AND r = 1
+            AND r = ?
             ORDER BY r ASC;
           `,
-    [selected.root]
+    [selected.root, "1"]
   );
 
   return query.data[0];
@@ -88,16 +71,58 @@ export async function queryRoots(selected: IString) {
   return result.data;
 }
 
-export async function queryInfinite(selected: IString, binyan: string) {
+export async function queryVerbInfinitive(selected: IString, binyan: string) {
   // @ts-expect-error
   const sw = new SQLiteWrapper(database);
 
-  const result = await sw
+  const query = await sw.query(
+    `
+            SELECT *
+            FROM ${ETable.verbs}
+            WHERE base = ?
+            AND r = ?
+            ORDER BY r ASC;
+          `,
+    [selected.root, "i"]
+  );
+
+  return query.data[0];
+}
+
+export async function queryInfinitiveTranslations({
+  root,
+  binyan,
+}: {
+  root: string;
+  binyan: string;
+}) {
+  // @ts-expect-error
+  const sw = new SQLiteWrapper(database);
+
+  const query = await sw
     .table(ETable.roots)
-    .where("binyan", `${binyan}`, "=", "AND")
-    .where("root", `${selected.root}`, "=", "AND")
-    .where("links", `${selected.links}`, "=")
+    .where("root", `${root}`, "=", "AND")
+    .where("binyan", `${binyan}`, "=")
     .select(null);
 
-  return result.data;
+  console.log("queryInfinitiveTranslations", query);
+
+  return query.data;
+}
+
+export async function queryVerbs(root: string) {
+  // @ts-expect-error
+  const sw = new SQLiteWrapper(database);
+
+  const { data } = await sw.query(
+    `
+            SELECT *
+            FROM ${ETable.verbs}
+            WHERE base = ?
+            ORDER BY r ASC;
+          `,
+    [root]
+  );
+
+  return data;
 }

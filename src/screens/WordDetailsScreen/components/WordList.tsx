@@ -3,9 +3,9 @@ import {
   useWordDetailsScreenDispatchedActions,
   useWordDetailsScreenStateSelector,
 } from "../../../store/slices/wordDetails/wordDetails.hooks";
-import { map, sortBy } from "lodash";
+import { map } from "lodash";
 import { WordListItemCard } from "./WordListItemCard";
-import { Dimensions, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 export default function WordList() {
   const { list, selected, selectedBinyan } =
@@ -25,7 +25,7 @@ export default function WordList() {
     if (selected && selectedBinyan) {
       void fetchRoots(selected);
     }
-  }, [selectedBinyan]);
+  }, [fetchRoots, selected, selectedBinyan]);
 
   return (
     <View style={styles.wordList}>
@@ -42,7 +42,5 @@ export default function WordList() {
 }
 
 const styles = StyleSheet.create({
-  wordList: {
-    width: "100%",
-  },
+  wordList: {},
 });
