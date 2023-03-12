@@ -57,7 +57,6 @@ export function VerbConjugationTables() {
             <TouchableOpacity
               key={index}
               onPress={() => {
-                console.log("binyan", binyan);
                 setSelectedBinyan(binyan);
               }}
               style={{

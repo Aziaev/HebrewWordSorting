@@ -601,12 +601,12 @@ export async function queryOtherLanguageNextPage({
   return flatArray;
 }
 
-export async function queryCount() {
+export async function queryTableCount(tableName: ETable) {
   // @ts-expect-error
   const sw = new SQLiteWrapper(database);
 
   const transaction = await sw.query(
-    `SELECT count(*) FROM ${ETable.strings} as count`
+    `SELECT count(*) FROM ${tableName} as count`
   );
 
   return transaction.data[0]["count(*)"];

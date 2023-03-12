@@ -18,8 +18,6 @@ export function Verbs() {
     }
   }, [fetchVerbs, infinitive, selected, selectedBinyan]);
 
-  console.log(selected);
-
   return (
     <View style={styles.card}>
       {Array.isArray(verbs) &&
