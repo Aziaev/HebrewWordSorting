@@ -8,13 +8,8 @@ import { useEffect } from "react";
 import { useStringsStateSelector } from "../../../store/slices/strings/strings.hooks";
 
 export function VerbInfinitive() {
-  const {
-    selected,
-    selectedBinyan,
-    binyans,
-    infinitive,
-    infinitiveTranslation,
-  } = useWordDetailsScreenStateSelector();
+  const { selected, selectedBinyan, binyans, infinitiveTranslation } =
+    useWordDetailsScreenStateSelector();
   const { fetchVerbInfinitive, fetchInfinitiveTranslations } =
     useWordDetailsScreenDispatchedActions();
 
@@ -44,9 +39,6 @@ export function VerbInfinitive() {
       <Text style={styles.translations} adjustsFontSizeToFit numberOfLines={3}>
         {translation}
       </Text>
-      {infinitive && selectedBinyan && (
-        <Text style={styles.hebrewText}>{infinitive[selectedBinyan]}</Text>
-      )}
     </View>
   );
 }
@@ -60,7 +52,7 @@ const styles = StyleSheet.create({
   },
   translations: {
     minHeight: 32,
-    backgroundColor: "white",
+    backgroundColor: Colors.grey2,
     width: "100%",
     paddingBottom: 5,
     paddingTop: 3,
