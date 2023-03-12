@@ -11,19 +11,15 @@ export function useStringsDispatchedActions() {
   return useMemo(
     () => ({
       searchByString: () => {
-        console.log("searchByString");
         void dispatch(searchByString());
       },
       fetchNextPage: () => {
-        console.log("fetchNextPage");
         void dispatch(fetchNextPage());
       },
       setSearch: (search: string) => {
-        console.log("setSearch");
         dispatch(stringsSlice.actions.setSearch(search));
       },
       setLanguage: (language: ELanguage.ru | ELanguage.ua | ELanguage.en) => {
-        console.log("setLanguage");
         dispatch(stringsSlice.actions.setLanguage(language));
       },
     }),

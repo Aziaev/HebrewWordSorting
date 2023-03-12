@@ -8,8 +8,9 @@ import { WordListItemCard } from "./WordListItemCard";
 import { Dimensions, StyleSheet, View } from "react-native";
 
 export default function WordList() {
-  const { list, selected } = useWordDetailsScreenStateSelector();
-  const { searchMatchingWords, reset, setSelected } =
+  const { list, selected, selectedBinyan } =
+    useWordDetailsScreenStateSelector();
+  const { searchMatchingWords, reset, setSelected, fetchRoots } =
     useWordDetailsScreenDispatchedActions();
 
   useEffect(() => {
@@ -19,6 +20,12 @@ export default function WordList() {
       reset();
     };
   }, [searchMatchingWords, reset]);
+
+  useEffect(() => {
+    if (selected && selectedBinyan) {
+      void fetchRoots(selected);
+    }
+  }, [selectedBinyan]);
 
   return (
     <View style={styles.wordList}>
@@ -36,6 +43,6 @@ export default function WordList() {
 
 const styles = StyleSheet.create({
   wordList: {
-    width: Dimensions.get("screen").width,
+    width: "100%",
   },
 });

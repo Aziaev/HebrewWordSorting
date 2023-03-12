@@ -74,8 +74,6 @@ export const initDb = createAsyncThunk(
       await sw.createTable(ETable.verbs, VerbsSchema);
       await sw.insert(ETable.verbs, verbsJson);
 
-      console.log(" DB READY");
-
       await AsyncStorage.setItem(EAsyncStorageKey.version, version);
     }
   }

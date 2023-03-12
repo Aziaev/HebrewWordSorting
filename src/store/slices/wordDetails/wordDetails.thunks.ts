@@ -1,7 +1,12 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { RootState } from "../../index";
 import { IString, IWordRoot } from "../../../types";
-import { queryMatchingHebrewWords, queryVerbs } from "./wordDetails.helpers";
+import {
+  queryBinyans,
+  queryInfinite,
+  queryMatchingHebrewWords,
+  queryRoots,
+} from "./wordDetails.helpers";
 import { wordDetailsSlice } from "./wordDetails";
 import { find } from "lodash";
 
@@ -37,14 +42,32 @@ export const searchMatchingWords = createAsyncThunk(
     return list;
   }
 );
-export const searchVerbs = createAsyncThunk(
-  "wordDetails/searchVerbs",
-  async (_, { getState, dispatch }) => {
-    const state = getState() as RootState;
-    const { selected } = state.wordDetails;
 
-    const verbs = await queryVerbs(selected as IString);
+export const searchBinyans = createAsyncThunk(
+  "wordDetails/searchBinyans",
+  async (str: IString) => {
+    const binyans = await queryBinyans(str);
 
-    return verbs;
+    return binyans;
+  }
+);
+
+export const fetchRoots = createAsyncThunk(
+  "wordDetails/fetchRoots",
+  async (str: IString) => {
+    const roots = await queryRoots(str);
+
+    return roots;
+  }
+);
+
+export const fetchInfinite = createAsyncThunk(
+  "wordDetails/fetchInfinite",
+  async ({ str, selectedBinyan }: { str: IString; selectedBinyan: string }) => {
+    const infinite = await queryInfinite(str, selectedBinyan);
+
+    console.log(infinite);
+
+    return infinite;
   }
 );

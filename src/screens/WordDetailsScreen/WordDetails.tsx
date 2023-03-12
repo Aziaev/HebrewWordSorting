@@ -3,7 +3,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
-  Text,
   View,
 } from "react-native";
 import { useEffect } from "react";
@@ -15,15 +14,18 @@ import WordList from "./components/WordList";
 import { VerbConjugationTables } from "./components/VerbConjugationTables";
 
 export default function WordDetails() {
-  const { searchMatchingWords, reset, searchVerbs } =
+  const { searchMatchingWords, reset, searchBinyans } =
     useWordDetailsScreenDispatchedActions();
-  const { selected, verbs } = useWordDetailsScreenStateSelector();
+  const { selected, selectedBinyan } = useWordDetailsScreenStateSelector();
+
+  const isVerb = selected?.r && selected.links;
 
   useEffect(() => {
-    if (selected?.r && selected.links) {
-      searchVerbs();
+    if (selected && checkHasLinksForVerb(selected?.links)) {
+      // Проверить есть ли в links буквы и цифры регуляркой
+      searchBinyans(selected);
     }
-  }, [searchVerbs, selected]);
+  }, [searchBinyans, selected]);
 
   useEffect(() => {
     searchMatchingWords();
@@ -41,7 +43,8 @@ export default function WordDetails() {
     >
       <View style={styles.container}>
         <WordList />
-        {/* <VerbConjugationTables /> */}
+        {isVerb && <VerbConjugationTables />}
+        {selectedBinyan && <VerbConjugationTables />}
       </View>
     </KeyboardAvoidingView>
   );
@@ -56,9 +59,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "flex-start",
     width: Dimensions.get("screen").width,
-    paddingTop: 10,
-    paddingBottom: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    backgroundColor: "white",
   },
 });
 
 WordDetails.path = "WordDetails";
+
+function checkHasLinksForVerb(str?: string) {
+  if (!str) {
+    return false;
+  }
+
+  return /[A-Za-z]/.test(str) && /[0-9]/.test(str);
+}

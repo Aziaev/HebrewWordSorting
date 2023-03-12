@@ -79,8 +79,6 @@ const styles = StyleSheet.create({
     borderColor: Colors.grey2,
     borderWidth: 1,
     borderRadius: 5,
-    marginLeft: 20,
-    marginRight: 20,
     width: "100%",
   },
   translations: {

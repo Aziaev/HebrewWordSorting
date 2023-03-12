@@ -34,18 +34,15 @@ export const stringsSlice = createSlice({
       state,
       action: PayloadAction<ELanguage.ru | ELanguage.ua | ELanguage.en>
     ) {
-      console.log("setLanguage");
       state.language = action.payload;
     },
   },
   extraReducers: (builder) => {
     builder.addCase(searchByString.pending, (state) => {
-      console.log("searchByString.pending");
       state.error = null;
       state.status = EStatus.loading;
     });
     builder.addCase(searchByString.fulfilled, (state, action) => {
-      console.log("searchByString.fulfilled");
       state.error = null;
       state.status = EStatus.ready;
       state.list = action.payload.list;
@@ -53,8 +50,6 @@ export const stringsSlice = createSlice({
       state.limit = action.payload.limit;
     });
     builder.addCase(searchByString.rejected, (state, action: any) => {
-      console.log("searchByString.rejected", action.error);
-
       if (action.payload) {
         state.error = action.payload.errorMessage;
       } else {
@@ -64,12 +59,10 @@ export const stringsSlice = createSlice({
       state.status = EStatus.error;
     });
     builder.addCase(fetchNextPage.pending, (state) => {
-      console.log("fetchNextPage.pending");
       state.error = null;
       state.status = EStatus.loading;
     });
     builder.addCase(fetchNextPage.fulfilled, (state, action: any) => {
-      console.log("fetchNextPage.fulfilled");
       state.error = null;
       state.status = EStatus.ready;
       state.list.push(...action.payload.list);
@@ -77,7 +70,6 @@ export const stringsSlice = createSlice({
       state.limit = action.payload.limit;
     });
     builder.addCase(fetchNextPage.rejected, (state, action: any) => {
-      console.log("fetchNextPage.rejected", action.error);
       if (action.payload) {
         state.error = action.payload.errorMessage;
       } else {

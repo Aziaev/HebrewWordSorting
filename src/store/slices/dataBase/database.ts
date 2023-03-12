@@ -35,7 +35,6 @@ export const databaseSlice = createSlice({
       state.ready = true;
     });
     builder.addCase(initDb.rejected, (state, action: any) => {
-      console.log("initDb.rejected", action);
       if (action.payload) {
         state.error = action.payload.errorMessage;
       } else {

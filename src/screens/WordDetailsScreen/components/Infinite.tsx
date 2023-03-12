@@ -7,56 +7,25 @@ import {
 } from "../../../store/slices/wordDetails/wordDetails.hooks";
 import { useEffect, useMemo } from "react";
 
-export function VerbConjugationTables() {
+export function Infinite() {
   const { selected, binyans, selectedBinyan } =
     useWordDetailsScreenStateSelector();
-  const { setSelectedBinyan } = useWordDetailsScreenDispatchedActions();
-
-  const sortedBinyanKeys = useMemo(
-    () =>
-      (binyans &&
-        filter(
-          Object.keys(binyans).sort(),
-          (str) => !["base", "face", "id", "r"].includes(str)
-        )) ||
-      [],
-    [binyans]
-  );
+  const { fetchInfinite } = useWordDetailsScreenDispatchedActions();
 
   useEffect(() => {
-    if (!isEmpty(sortedBinyanKeys)) {
-      setSelectedBinyan(sortedBinyanKeys[0]);
+    if (selectedBinyan && selected) {
+      void fetchInfinite(selected, selectedBinyan);
     }
-  }, [setSelectedBinyan, sortedBinyanKeys]);
+  }, [fetchInfinite, selected, selectedBinyan]);
+
+  console.log("selected", selectedBinyan);
 
   return (
     <View style={styles.card}>
       <Text style={styles.translations} adjustsFontSizeToFit numberOfLines={3}>
         Verb conjugation tables
       </Text>
-      <Text style={styles.hebrewText}>{selected?.root}</Text>
-      {binyans &&
-        map(sortedBinyanKeys, (binyan, index) => {
-          /* @ts-expect-error */
-          return binyans[binyan] ? (
-            <TouchableOpacity
-              key={index}
-              onPress={() => {
-                console.log("binyan", binyan);
-                setSelectedBinyan(binyan);
-              }}
-              style={{
-                ...styles.pressable,
-                ...(selectedBinyan === binyan ? styles.selected : {}),
-              }}
-            >
-              <Text style={styles.hebrewText}>
-                {/* @ts-expect-error */}
-                {binyans[binyan]}
-              </Text>
-            </TouchableOpacity>
-          ) : null;
-        })}
+      <Text style={styles.hebrewText}>infinite</Text>
     </View>
   );
 }
