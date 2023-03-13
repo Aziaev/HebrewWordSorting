@@ -35,18 +35,10 @@ export function VerbConjugationTables() {
         Verb conjugation tables
       </Text>
       <View style={styles.row}>
-        <Text
-          style={[styles.hebrewText, styles.word]}
-          adjustsFontSizeToFit
-          numberOfLines={1}
-        >
+        <Text style={styles.word} adjustsFontSizeToFit numberOfLines={1}>
           {selected?.root}
         </Text>
-        <Text
-          style={[styles.hebrewText, styles.auxWords]}
-          adjustsFontSizeToFit
-          numberOfLines={1}
-        >
+        <Text style={styles.auxWords} adjustsFontSizeToFit numberOfLines={1}>
           שוֹרֶש
         </Text>
       </View>
@@ -133,11 +125,14 @@ const styles = StyleSheet.create({
     flex: 1,
     color: "black",
     padding: 0,
+    fontSize: 32,
+    fontFamily: "David",
   },
   auxWords: {
     textAlign: "left",
     flex: 1,
     color: "brown",
     fontSize: 24,
+    fontFamily: "David",
   },
 });
