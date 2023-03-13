@@ -6,6 +6,7 @@ import {
   useWordDetailsScreenStateSelector,
 } from "../../../store/slices/wordDetails/wordDetails.hooks";
 import { useEffect, useMemo } from "react";
+import { IVerb } from "../../../types";
 
 export function VerbConjugationTables() {
   const { selected, binyans, selectedBinyan } =
@@ -24,10 +25,15 @@ export function VerbConjugationTables() {
   );
 
   useEffect(() => {
-    if (!isEmpty(sortedBinyanKeys)) {
-      setSelectedBinyan(sortedBinyanKeys[0]);
+    if (!isEmpty(sortedBinyanKeys) && selected) {
+      const initialBinyanText = selected.translations?.[0]?.binyan;
+      const binyanKey =
+        binyans &&
+        initialBinyanText &&
+        findBinyanKey(binyans, initialBinyanText);
+      setSelectedBinyan(binyanKey || sortedBinyanKeys[0]);
     }
-  }, [setSelectedBinyan, sortedBinyanKeys]);
+  }, [binyans, selected, setSelectedBinyan, sortedBinyanKeys]);
 
   return (
     <View style={styles.card}>
@@ -148,3 +154,14 @@ const styles = StyleSheet.create({
     fontFamily: "David",
   },
 });
+
+function findBinyanKey(binyans: IVerb, binyanValue: string) {
+  for (const key in binyans) {
+    // @ts-expect-error
+    if (binyans[key] === binyanValue) {
+      return key;
+    }
+  }
+
+  return null;
+}
