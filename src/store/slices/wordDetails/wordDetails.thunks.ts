@@ -16,7 +16,7 @@ export const searchMatchingWords = createAsyncThunk(
   "wordDetails/searchMatchingWords",
   async (_, { getState, dispatch }) => {
     const state = getState() as RootState;
-    const { clickedItem } = state.wordDetails;
+    const { clickedItem, search } = state.wordDetails;
 
     // @ts-expect-error
     const isHebrewWordClicked = clickedItem?.word && !clickedItem?.string;

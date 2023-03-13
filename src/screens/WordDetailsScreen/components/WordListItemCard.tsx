@@ -26,8 +26,13 @@ export function WordListItemCard({
     `${str?.time?.time} ${str?.time?.pronouns}`;
 
   return (
-    <TouchableOpacity onPress={onPress}>
-      <View style={styles.card}>
+    <TouchableOpacity onPress={onPress} activeOpacity={1}>
+      <View
+        style={{
+          ...styles.card,
+          opacity: selected ? 1 : 0.6,
+        }}
+      >
         <Text
           style={styles.translations}
           adjustsFontSizeToFit
