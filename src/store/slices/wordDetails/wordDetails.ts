@@ -12,7 +12,7 @@ import { ELanguage } from "../../../common/constants";
 
 export interface IStringsState {
   clickedItem?: IString | IWordRoot;
-  search?: string;
+  search: string;
   language?: ELanguage.ru | ELanguage.ua | ELanguage.en;
   error?: string;
   status: EStatus;
@@ -29,6 +29,7 @@ export interface IStringsState {
 export type TBinyan = "g" | "f" | "e" | "d" | "c" | "b" | "a";
 
 const initialState: IStringsState = {
+  search: "",
   status: EStatus.ready,
   list: [],
   verbs: [],

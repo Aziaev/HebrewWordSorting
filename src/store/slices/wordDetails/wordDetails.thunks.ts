@@ -5,13 +5,13 @@ import {
   queryBinyans,
   queryInfinitiveTranslations,
   queryMatchingHebrewWords,
+  queryMatchingOtherLanguageWords,
   queryRoots,
   queryVerbInfinitive,
   queryVerbs,
 } from "./wordDetails.helpers";
 import { wordDetailsSlice } from "./wordDetails";
-import { find } from "lodash";
-import { getIsHebrewText } from "../../../common/helpers";
+import { find, some } from "lodash";
 
 export const searchMatchingWords = createAsyncThunk(
   "wordDetails/searchMatchingWords",
@@ -20,50 +20,32 @@ export const searchMatchingWords = createAsyncThunk(
     const { clickedItem, search, language } = state.wordDetails;
 
     let list = [];
-    console.log({ clickedItem, search });
 
-    const isHebrewSearch = getIsHebrewText(search);
-    const hasHebrewSearchMatch =
-      isHebrewSearch && (clickedItem as IString).word === search;
-    const hasTranslationSearchMatch = !isHebrewSearch;
+    const translation =
+      search && language && (clickedItem as IWordRoot)[`${language}LowerCase`];
 
-    // @ts-expect-error
-    const isHebrewWordClicked = clickedItem?.word && !clickedItem?.string;
+    const hasTranslationMatch =
+      translation &&
+      checkWordHasMatchTranslation(search.toLowerCase(), translation);
 
-    const hasSearch = !!search;
-
-    const searchHebrewRoot = isHebrewWordClicked
-      ? (clickedItem as IString).word
-      : (clickedItem as IWordRoot)?.string.word;
-
-    if (!search) {
-      list = await queryMatchingHebrewWords(searchHebrewRoot);
+    if (hasTranslationMatch) {
+      list = await queryMatchingOtherLanguageWords({ search, language });
     } else {
+      // @ts-expect-error
+      const isHebrewWordClicked = clickedItem?.word && !clickedItem?.string;
+
+      const searchHebrewRoot = isHebrewWordClicked
+        ? (clickedItem as IString).word
+        : (clickedItem as IWordRoot)?.string.word;
       list = await queryMatchingHebrewWords(searchHebrewRoot);
     }
-
-    if (search && !isHebrewSearch) {
-      const searchWord = clickedItem as IWordRoot;
-    }
-
-    // if(hebrewSearch && hasMatchingInClicked){
-    //   search matching hebrewWords
-    // }
-
-    // if(hebrewSearch && !hasMatchingInClicked){
-    //   search clicked hebrew word matched hebrewWords
-    // }
-
-    // if(!hebrewSearch && hasMatchingTranslation){
-    //   fetch matching roots with strings
-    // }
 
     const clickedItemId =
       (clickedItem as IWordRoot)?.string?.id || clickedItem?.id;
 
     dispatch(
       wordDetailsSlice.actions.setSelected(
-        <IString>find(list, { id: clickedItemId })
+        find(list, { id: clickedItemId }) as IString
       )
     );
 
@@ -116,18 +98,24 @@ export const fetchVerbs = createAsyncThunk(
   }
 );
 
-function checkWordHasMatch(searchString: string, sentence: string) {
+function checkWordHasMatchTranslation(searchString: string, sentence: string) {
+  console.log({ searchString, sentence });
+
   let result = false;
 
-  const patterns = [
-    `${searchString},%`,
-    `%, ${searchString},%`,
-    `%,${searchString},%`,
-    `%, ${searchString}`,
-    `%,${searchString}`,
+  const inSentencePattern = [
+    `${searchString},`,
+    `, ${searchString},`,
+    `,${searchString},`,
+    `, ${searchString}`,
+    `,${searchString}`,
   ];
 
   if (searchString === sentence) {
+    result = true;
+  }
+
+  if (some(inSentencePattern, (pattern) => sentence.includes(pattern))) {
     result = true;
   }
 

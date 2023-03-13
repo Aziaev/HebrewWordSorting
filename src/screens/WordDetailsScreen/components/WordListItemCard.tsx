@@ -3,6 +3,8 @@ import Colors from "../../../common/constants/Colors";
 import { IString } from "../../../types";
 import { map } from "lodash";
 import { useStringsStateSelector } from "../../../store/slices/strings/strings.hooks";
+import { HightLightedText } from "../../StringsScreen/components/HighLights";
+import { useWordDetailsScreenStateSelector } from "../../../store/slices/wordDetails/wordDetails.hooks";
 
 interface IWordListItemCardProps {
   str: IString;
@@ -15,6 +17,7 @@ export function WordListItemCard({
   onPress,
   selected,
 }: IWordListItemCardProps) {
+  const { search } = useWordDetailsScreenStateSelector();
   const { language } = useStringsStateSelector();
   const translation = map(
     str.translations,
@@ -38,7 +41,7 @@ export function WordListItemCard({
           adjustsFontSizeToFit
           numberOfLines={3}
         >
-          {translation}
+          <HightLightedText text={translation} search={search} />
         </Text>
         <View style={styles.hebrewWords}>
           {prefix ? (
@@ -55,7 +58,11 @@ export function WordListItemCard({
                 {str.words}
               </Text>
               <Text
-                style={[styles.hebrewText, styles.auxWords]}
+                style={[
+                  styles.hebrewText,
+                  styles.auxWords,
+                  { color: selected ? "brown" : "black" },
+                ]}
                 adjustsFontSizeToFit
                 numberOfLines={1}
               >
@@ -124,7 +131,6 @@ const styles = StyleSheet.create({
   auxWords: {
     textAlign: "left",
     flex: 1,
-    color: "brown",
     fontSize: 24,
   },
 });

@@ -49,6 +49,7 @@ export function VerbConjugationTables() {
           return binyans[binyan] ? (
             <TouchableOpacity
               key={index}
+              activeOpacity={1}
               onPress={() => {
                 setSelectedBinyan(binyan);
               }}
