@@ -423,8 +423,6 @@ export async function queryOtherLanguageList({
           const firstInListRowIds = map(firstInListData, ({ id }) => id);
           sw.table("tempRootList").whereIn("id", firstInListRowIds).delete();
 
-          console.log(firstInListData);
-
           // match as one of word in list
           const { data: oneOfListData } = await sw.query(
             `
@@ -527,7 +525,12 @@ export async function queryOtherLanguageList({
       });
 
       if (isEmpty(strings)) {
-        console.log("wordRoot", wordRoot, wordRoot.root, wordRoot.links);
+        console.log(
+          "wordRoot empty string!!!",
+          wordRoot,
+          wordRoot.root,
+          wordRoot.links
+        );
       }
 
       return {

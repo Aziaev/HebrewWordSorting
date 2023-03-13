@@ -30,7 +30,7 @@ export function WordListItemCard({
       <View
         style={{
           ...styles.card,
-          opacity: selected ? 1 : 0.6,
+          opacity: selected ? 1 : 0.5,
         }}
       >
         <Text

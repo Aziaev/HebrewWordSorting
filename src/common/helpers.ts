@@ -1,6 +1,10 @@
 const hebrewLetterRegexp = /[\u0590-\u05fe]/;
 
-export function getIsHebrewText(text: string) {
+export function getIsHebrewText(text?: string) {
+  if (!text) {
+    return false;
+  }
+
   return hebrewLetterRegexp.test(text?.[0]);
 }
 

@@ -11,32 +11,58 @@ import {
 } from "./wordDetails.helpers";
 import { wordDetailsSlice } from "./wordDetails";
 import { find } from "lodash";
+import { getIsHebrewText } from "../../../common/helpers";
 
 export const searchMatchingWords = createAsyncThunk(
   "wordDetails/searchMatchingWords",
   async (_, { getState, dispatch }) => {
     const state = getState() as RootState;
-    const { clickedItem, search } = state.wordDetails;
+    const { clickedItem, search, language } = state.wordDetails;
+
+    let list = [];
+    console.log({ clickedItem, search });
+
+    const isHebrewSearch = getIsHebrewText(search);
+    const hasHebrewSearchMatch =
+      isHebrewSearch && (clickedItem as IString).word === search;
+    const hasTranslationSearchMatch = !isHebrewSearch;
 
     // @ts-expect-error
     const isHebrewWordClicked = clickedItem?.word && !clickedItem?.string;
+
+    const hasSearch = !!search;
 
     const searchHebrewRoot = isHebrewWordClicked
       ? (clickedItem as IString).word
       : (clickedItem as IWordRoot)?.string.word;
 
-    if (!searchHebrewRoot) {
-      return [];
+    if (!search) {
+      list = await queryMatchingHebrewWords(searchHebrewRoot);
+    } else {
+      list = await queryMatchingHebrewWords(searchHebrewRoot);
     }
 
-    const list = await queryMatchingHebrewWords(searchHebrewRoot);
+    if (search && !isHebrewSearch) {
+      const searchWord = clickedItem as IWordRoot;
+    }
+
+    // if(hebrewSearch && hasMatchingInClicked){
+    //   search matching hebrewWords
+    // }
+
+    // if(hebrewSearch && !hasMatchingInClicked){
+    //   search clicked hebrew word matched hebrewWords
+    // }
+
+    // if(!hebrewSearch && hasMatchingTranslation){
+    //   fetch matching roots with strings
+    // }
 
     const clickedItemId =
       (clickedItem as IWordRoot)?.string?.id || clickedItem?.id;
 
     dispatch(
       wordDetailsSlice.actions.setSelected(
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         <IString>find(list, { id: clickedItemId })
       )
     );
@@ -89,3 +115,21 @@ export const fetchVerbs = createAsyncThunk(
     return verbs;
   }
 );
+
+function checkWordHasMatch(searchString: string, sentence: string) {
+  let result = false;
+
+  const patterns = [
+    `${searchString},%`,
+    `%, ${searchString},%`,
+    `%,${searchString},%`,
+    `%, ${searchString}`,
+    `%,${searchString}`,
+  ];
+
+  if (searchString === sentence) {
+    result = true;
+  }
+
+  return result;
+}
