@@ -1,43 +1,49 @@
-[
-  {
-    "id": 14800,
-    "links": "158a",
-    "r": "a",
-    "root": "ע.ב.ד.",
-    "sortKey": "lpbfd",
-    "translations": [
-      {
-        "binyan": "פָּעַל",
-        "en": "serve, work",
-        "enLowerCase": "serve, work",
-        "id": 1743,
-        "links": "158a",
-        "root": "ע.ב.ד.",
-        "ru": "служить, работать",
-        "ruLowerCase": "служить, работать",
-        "strings": [
-          Array
-        ],
-        "ua": "служити, працювати",
-        "uaLowerCase": "служити, працювати",
-        "words": "לַעֲבוֹד אֶת, אֵצֶל, בְּ, עִם",
-        "words1": "לַעֲבוֹד"
-      }
-    ],
-    "word": "לעבוד",
-    "words": "לַעֲבוֹד"
-  },
-  {
-    "a": "פָּעַל",
-    "b": "פִּיעֵל",
-    "base": "ע.ב.ד.",
-    "c": "פֻּעַל",
-    "d": "הִפעִיל",
-    "e": null,
-    "f": null,
-    "face": "בִּנייָן",
-    "g": null,
-    "id": 6884,
-    "r": "1"
-  }
-]
+{
+  "firstInListData": [
+    {
+      "binyan": "פִּיעֵל",
+      "en": "jump, bounce",
+      "enLowerCase": "jump, bounce",
+      "id": 2918,
+      "links": "586a",
+      "root": "נ.ת.ר.",
+      "ru": "прыгать, подпрыгивать",
+      "ruLowerCase": "прыгать, подпрыгивать",
+      "ua": "стрибати, підстрибувати",
+      "uaLowerCase": "стрибати, підстрибувати",
+      "words": "לְנַתֵר מֵעַל",
+      "words1": "לְנַתֵר"
+    },
+    {
+      "binyan": "פִּיעֵל",
+      "en": "jump",
+      "enLowerCase": "jump",
+      "id": 4278,
+      "links": "89b",
+      "root": "ק.פ.צ.",
+      "ru": "прыгать, скакать",
+      "ruLowerCase": "прыгать, скакать",
+      "ua": "стрибати, скакати",
+      "uaLowerCase": "стрибати, скакати",
+      "words": "לְקַפֵּץ",
+      "words1": "לְקַפֵּץ"
+    }
+  ],
+  "fullMatchData": [
+    {
+      "binyan": "פָּעַל",
+      "en": "jump",
+      "enLowerCase": "jump",
+      "id": 4277,
+      "links": "89a",
+      "root": "ק.פ.צ.",
+      "ru": "прыгать",
+      "ruLowerCase": "прыгать",
+      "ua": "стрибати",
+      "uaLowerCase": "стрибати",
+      "words": "לִקפּוֹץ",
+      "words1": "לִקפּוֹץ"
+    }
+  ],
+  "oneOfListData": []
+}

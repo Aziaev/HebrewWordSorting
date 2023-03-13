@@ -99,8 +99,6 @@ export const fetchVerbs = createAsyncThunk(
 );
 
 function checkWordHasMatchTranslation(searchString: string, sentence: string) {
-  console.log({ searchString, sentence });
-
   let result = false;
 
   const inSentencePattern = [
