@@ -1,1 +1,16 @@
-[{"id":35836,"root":"א.ב.ח.נ.","words":"אֲאַבחֵן","word":"אאבחן","r":"o","links":"782a","sortKey":"aabhn","translations":[{"id":14978,"root":"א.ב.ח.נ.","links":"782a","binyan":"פִּיעֵל","ru":"диагностировать","ruLowerCase":"диагностировать","ua":"діагностувати","uaLowerCase":"діагностувати","en":"diagnose","enLowerCase":"diagnose","words1":"לְאַבחֵן","words":"לְאַבחֵן"}],"time":{"id":16,"r":"o","time":"עָתִיד","pronouns":"אֲנִי"}},{"id":37603,"root":"א.ב.ח.נ.","words":"אֲאֻבחַן","word":"אאבחן","r":o","links":"782b","sortKey":"aabhn","translations":[{"id":14979,"root":"א.ב.ח.נ.","links":"782b","binyan":"פֻּעַל","ru":"был диагностирован","ruLowerCase":"был диагностирован","ua":"був діагностований","uaLowerCase":"був діагностований","en":"was diagnosed","enLowerCase":"was diagnosed","words1":"אֻבחַן","words":"אֻבחַן עַל-יְדֵ"}],"time":{"id":16,"r":"o","time":"עָתִיד","pronouns":"אֲנִי"}}]
+
+נ.ט.ל. 330a
+{
+  "binyan": "פָּעַל",
+  "en": "put, lay, take",
+  "enLowerCase": "put, lay, take",
+  "id": 1346,
+  "links": "330a",
+  "root": "נ.ט.ל.",
+  "ru": "класть, возлагать, брать",
+  "ruLowerCase": "класть, возлагать, брать",
+  "ua": "класти, покладати, брати",
+  "uaLowerCase": "класти, покладати, брати",
+  "words": "לִנטוֹל",
+  "words1": "לִנטוֹל"
+}

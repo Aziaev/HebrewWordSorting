@@ -11,8 +11,7 @@ import { Verbs } from "./components/Verbs";
 import BottomBarButtons from "../../common/components/BottomBarButtons";
 
 export default function WordDetails() {
-  const { searchMatchingWords, reset, searchBinyans } =
-    useWordDetailsScreenDispatchedActions();
+  const { searchBinyans } = useWordDetailsScreenDispatchedActions();
   const { selected, selectedBinyan } = useWordDetailsScreenStateSelector();
 
   const isVerb = selected?.r && selected.links;
@@ -23,14 +22,6 @@ export default function WordDetails() {
       searchBinyans(selected);
     }
   }, [searchBinyans, selected]);
-
-  useEffect(() => {
-    searchMatchingWords();
-
-    return () => {
-      reset();
-    };
-  }, [searchMatchingWords, reset]);
 
   return (
     <View style={styles.container}>

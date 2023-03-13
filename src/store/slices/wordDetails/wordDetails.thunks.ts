@@ -1,6 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { RootState } from "../../index";
-import { IString, IVerb, IWordRoot } from "../../../types";
+import { IString, IWordRoot } from "../../../types";
 import {
   queryBinyans,
   queryInfinitiveTranslations,

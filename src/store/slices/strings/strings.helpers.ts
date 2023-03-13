@@ -357,7 +357,7 @@ export async function queryOtherLanguageList({
       OR ${language}LowerCase LIKE ?
       OR ${language}LowerCase LIKE ?
       ORDER BY ${language}LowerCase ASC
-      LIMIT 1;
+      LIMIT 100;
     `,
       [lowerCaseSearch, `${lowerCaseSearch}%`, `% ${lowerCaseSearch}%`]
     );
@@ -422,6 +422,8 @@ export async function queryOtherLanguageList({
           );
           const firstInListRowIds = map(firstInListData, ({ id }) => id);
           sw.table("tempRootList").whereIn("id", firstInListRowIds).delete();
+
+          console.log(firstInListData);
 
           // match as one of word in list
           const { data: oneOfListData } = await sw.query(
@@ -524,6 +526,10 @@ export async function queryOtherLanguageList({
         return !str.r || str.r === "a";
       });
 
+      if (isEmpty(strings)) {
+        console.log("wordRoot", wordRoot, wordRoot.root, wordRoot.links);
+      }
+
       return {
         ...wordRoot,
         strings,
@@ -534,11 +540,17 @@ export async function queryOtherLanguageList({
   const flatArray: IWordRoot[] = reduce(
     mixedRootsStringsArray,
     (result, item) => {
-      const innerArray = map(item.strings, (string: IString) => ({
-        ...item,
-        string,
-        id: `${item.id}_${string.id}`,
-      }));
+      let innerArray = [];
+
+      if (isEmpty(item.strings)) {
+        innerArray = [item];
+      } else {
+        innerArray = map(item.strings, (string: IString) => ({
+          ...item,
+          string,
+          id: `${item.id}_${string.id}`,
+        }));
+      }
 
       // @ts-expect-error
       return concat(result, innerArray);

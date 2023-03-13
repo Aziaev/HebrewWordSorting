@@ -42,6 +42,7 @@ export function VerbConjugationTables() {
           שוֹרֶש
         </Text>
       </View>
+      <Text style={styles.hebrewText}>בִּנייָן</Text>
       {binyans &&
         map(sortedBinyanKeys, (binyan, index) => {
           /* @ts-expect-error */
@@ -119,6 +120,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
+    borderColor: Colors.grey3,
+    borderBottomWidth: 1,
   },
   word: {
     textAlign: "right",
