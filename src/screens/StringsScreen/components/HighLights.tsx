@@ -1,5 +1,6 @@
 import { Fragment } from "react";
 import { Text } from "react-native";
+import { trimHebrewText } from "../../../common/helpers";
 
 interface IProps {
   search: string;
@@ -41,15 +42,18 @@ export function HightLightHebrewText({
   displayText = "",
   compareText,
 }: IHightLightHebrewTextProps) {
-  const searchString = search.toLowerCase().trim();
-
   const compareTextArray = compareText?.split(",");
   const displayTextArray = displayText?.split(",");
 
   const TextElements = displayTextArray.map((displayText, index, arr) => {
     let style;
 
-    if (search && compareTextArray?.[index] === searchString) {
+    const searchTrim = trimHebrewText(search.toLowerCase());
+    const trimCompare = trimHebrewText(compareTextArray?.[index]);
+
+    console.log({ search, searchTrim, trimCompare });
+
+    if (searchTrim && trimCompare === searchTrim) {
       style = {
         color: "#F00",
       };

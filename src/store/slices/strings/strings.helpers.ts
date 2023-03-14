@@ -2,7 +2,7 @@ import SQLiteWrapper from "../../../common/SQLWrapper";
 import { database } from "../../../index";
 import { concat, filter, find, forEach, isEmpty, map, reduce } from "lodash";
 import { IString, IWordRoot } from "../../../types";
-import { getIsHebrewText } from "../../../common/helpers";
+import { getIsHebrewText, trimHebrewText } from "../../../common/helpers";
 import { ELanguage, ETable } from "../../../common/constants";
 
 export async function queryList({
@@ -23,7 +23,7 @@ export async function queryList({
     : queryOtherLanguageList;
 
   return await listQueryFunction({
-    search,
+    search: isHebrewSearch ? trimHebrewText(search) : search,
     limit,
     offset,
     language,
@@ -113,6 +113,10 @@ async function queryHebrewList({
 
     strings = stringListQuery?.data;
   } else {
+    const searchTrim = trimHebrewText(search);
+
+    console.log({ search, searchTrim, equality: searchTrim === search });
+
     matchingRowsQuery = await sw.query(
       `
       SELECT *
@@ -124,6 +128,22 @@ async function queryHebrewList({
     `,
       [search, `${search}%`]
     );
+    const trimSearchQuery = await sw.query(
+      `
+      SELECT *
+      FROM strings
+      WHERE word = ?
+      OR word LIKE ?
+      ORDER BY sortKey ASC
+      LIMIT 1;
+    `,
+      [searchTrim, `${searchTrim}%`]
+    );
+
+    console.log({
+      matchingRowsQueryLength: matchingRowsQuery.length,
+      trimSearchQueryLength: trimSearchQuery.length,
+    });
   }
 
   if (!isEmpty(matchingRowsQuery?.data)) {

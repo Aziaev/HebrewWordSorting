@@ -10,10 +10,12 @@ import { EStatus } from "../../types";
 import SearchInput from "./components/SearchInput";
 import StringList from "./components/StringList";
 import BottomBarButtons from "../../common/components/BottomBarButtons";
-import { NOTHING_FOUND } from "../../common/constants";
+import { ELanguage, NOTHING_FOUND } from "../../common/constants";
+import { getIsHebrewText } from "../../common/helpers";
 
 export default function StringsScreen() {
   const { search, list, status, language } = useStringsStateSelector();
+  const isHebrewSearch = getIsHebrewText(search);
   const isLoading = status === EStatus.loading;
 
   return (
@@ -27,7 +29,8 @@ export default function StringsScreen() {
         <View style={styles.searchResult}>
           {list.length === 0 && search && !isLoading && (
             <Text style={styles.text}>
-              {language && NOTHING_FOUND[language]}
+              {(isHebrewSearch && NOTHING_FOUND[ELanguage.en]) ||
+                NOTHING_FOUND[language]}
             </Text>
           )}
           <StringList />

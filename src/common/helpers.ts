@@ -1,11 +1,19 @@
+import { trim } from "lodash";
+
 const hebrewLetterRegexp = /[\u0590-\u05fe]/;
 
+export function trimHebrewText(text?: string) {
+  return trim((text || "").replace("‏", " "));
+}
+
 export function getIsHebrewText(text?: string) {
-  if (!text) {
+  const textValue = trimHebrewText(text);
+
+  if (!textValue) {
     return false;
   }
 
-  return hebrewLetterRegexp.test(text?.[0]);
+  return hebrewLetterRegexp.test(textValue?.[0]);
 }
 
 export function createLatinSortKey(word: string) {

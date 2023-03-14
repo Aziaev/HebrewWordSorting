@@ -1,4 +1,4 @@
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, useNavigation } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as React from "react";
 import StringsScreen from "../screens/StringsScreen/StringsScreen";
@@ -7,6 +7,10 @@ import DBLoadingScreen from "../screens/DBLoadingScreen";
 import { APP_TITLE, ELanguage } from "../common/constants";
 import WordDetails from "../screens/WordDetailsScreen/WordDetails";
 import NonVerbScreen from "../screens/NonVerbScreen/NonVerbScreen";
+import HelpScreen from "../screens/HelpScreen";
+import { Pressable } from "react-native";
+import { AntDesign } from "@expo/vector-icons";
+import Colors from "../common/constants/Colors";
 
 const Stack = createNativeStackNavigator();
 
@@ -31,6 +35,7 @@ export default function Navigation() {
                   backgroundColor: "#f7f7f7",
                 },
                 headerTitleAlign: "center",
+                headerRight: RightButton,
               }}
             />
             <Stack.Screen
@@ -42,12 +47,23 @@ export default function Navigation() {
                 headerStyle: {
                   backgroundColor: "#f7f7f7",
                 },
-                headerBackTitle: "fsdf",
+                headerRight: RightButton,
               }}
             />
             <Stack.Screen
               name={NonVerbScreen.path}
               component={NonVerbScreen}
+              options={{
+                title: APP_TITLE[ELanguage.en],
+                headerBackTitleVisible: false,
+                headerStyle: {
+                  backgroundColor: "#f7f7f7",
+                },
+              }}
+            />
+            <Stack.Screen
+              name={HelpScreen.path}
+              component={HelpScreen}
               options={{
                 title: APP_TITLE[ELanguage.en],
                 headerBackTitleVisible: false,
@@ -66,5 +82,21 @@ export default function Navigation() {
         )}
       </Stack.Navigator>
     </NavigationContainer>
+  );
+}
+
+function RightButton() {
+  const { navigate } = useNavigation();
+
+  return (
+    <Pressable
+      // @ts-expect-error
+      onPress={() => navigate(HelpScreen.path)}
+      style={({ pressed }) => ({
+        opacity: pressed ? 0.5 : 1,
+      })}
+    >
+      <AntDesign name="infocirlce" size={25} color={Colors.accentColor} />
+    </Pressable>
   );
 }

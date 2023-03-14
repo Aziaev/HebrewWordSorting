@@ -22,7 +22,7 @@ export default function SearchInput() {
 
   useEffect(() => {
     debouncedSearchByString();
-  }, [search, searchByString, debouncedSearchByString]);
+  }, [search, debouncedSearchByString]);
 
   return (
     // @ts-expect-error
@@ -31,6 +31,9 @@ export default function SearchInput() {
         // @ts-expect-error
         style={getStyles(search).textInput}
         value={search}
+        // onBlur={() => {
+        //   debouncedOnTextChange.flush();
+        // }}
         onChangeText={setSearch}
         placeholder={INPUT_PLACEHOLDER[ELanguage.en]}
         placeholderTextColor={Colors.grey5}
