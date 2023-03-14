@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
   bottomBar: {
     borderTopColor: Colors.grey5,
     borderTopWidth: 1,
-    height: Platform.OS === "ios" ? 90 : 60,
+    height: Platform.OS === "ios" ? 90 : 100,
     position: "absolute",
     bottom: 0,
     width: "100%",

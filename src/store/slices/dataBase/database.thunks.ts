@@ -32,7 +32,7 @@ export const initDb = createAsyncThunk(
   async (_, { dispatch }) => {
     const storedVersion = await AsyncStorage.getItem(EAsyncStorageKey.version);
 
-    if (storedVersion !== version) {
+    if (!storedVersion !== version) {
       // @ts-expect-error
       const sw = new SQLiteWrapper(database);
 
